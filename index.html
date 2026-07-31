@@ -692,7 +692,7 @@ function renderFinal() {
   }
 
   if (needsPeoria) {
-    const { coursePar, results, pairwise } = computePeoria(state);
+    const { coursePar, results } = computePeoria(state);
     html += `
       <div class="final-banner">
         <div class="title">신페리오 · 결과 공개</div>
@@ -716,26 +716,16 @@ function renderFinal() {
         </table>
       </div>
 
-      <label>신페리오 정산 (받으면 초록, 내면 빨강)</label>
-      <div class="card" style="padding:0;">
-        ${results.map((r) => `
-          <div class="settle-row">
+      <div class="final-banner">
+        <div class="title">신페리오 · 최종 정산</div>
+        ${[...results].sort((a, b) => b.settle - a.settle).map((r) => `
+          <div style="display:flex; justify-content:space-between; padding:7px 2px; font-size:15px; font-weight:700;">
             <span>${r.name}</span>
-            <span class="amt ${r.settle >= 0 ? "pos" : "neg"}">${r.settle >= 0 ? "+" : ""}${fmt(r.settle)}원</span>
+            <span style="color:${r.settle > 0 ? "var(--ok)" : r.settle < 0 ? "var(--red)" : "var(--creamDim)"};">
+              ${r.settle > 0 ? "+" : ""}${fmt(r.settle)}원
+            </span>
           </div>
         `).join("")}
-      </div>
-
-      <label>신페리오 · 누가 누구에게</label>
-      <div class="card" style="padding:0;">
-        ${pairwise.length === 0
-          ? `<div class="empty-note">전원 넷스코어 동률 — 정산 없음</div>`
-          : pairwise.map((p) => `
-            <div class="settle-row">
-              <span>${p.from} → ${p.to}</span>
-              <span class="amt pos">${fmt(p.amount)}원</span>
-            </div>
-          `).join("")}
       </div>
     `;
   }
