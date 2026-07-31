@@ -1,0 +1,782 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<meta name="theme-color" content="#0E3B2E" />
+<title>골프 스코어 정산</title>
+<style>
+  :root {
+    --bg: #0E3B2E;
+    --panel: #0A2C22;
+    --panelLight: #134534;
+    --cream: #F2EBD8;
+    --creamDim: rgba(242,235,216,0.55);
+    --line: rgba(242,235,216,0.14);
+    --red: #E4572E;
+    --brass: #C8A96A;
+    --ok: #7FD1A8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--cream); }
+  body {
+    font-family: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  }
+  #app { max-width: 480px; margin: 0 auto; padding: 20px 16px 60px; }
+  .hidden { display: none !important; }
+
+  h1 { font-size: 20px; margin: 16px 0 4px; }
+  .subtitle { font-size: 13px; color: var(--creamDim); margin-bottom: 20px; line-height: 1.5; }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+
+  label { display: block; font-size: 12px; color: var(--brass); font-weight: 700; margin: 12px 0 6px; letter-spacing: 0.04em; }
+  label:first-child { margin-top: 0; }
+
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 11px 12px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: var(--cream);
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+  }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+  button { font-family: inherit; cursor: pointer; }
+  .btn-primary {
+    width: 100%; padding: 13px 0; background: var(--cream); color: var(--bg);
+    border: none; border-radius: 4px; font-weight: 800; font-size: 15px; margin-top: 16px;
+  }
+  .btn-ghost {
+    padding: 8px 14px; background: transparent; color: var(--brass);
+    border: 1px solid var(--brass); border-radius: 4px; font-weight: 700; font-size: 12.5px;
+  }
+  .mode-btn {
+    padding: 12px 4px; background: transparent; color: var(--brass);
+    border: 1px solid var(--line); border-radius: 4px; font-weight: 700; font-size: 12.5px;
+    text-align: center; line-height: 1.4;
+  }
+  .mode-btn.active { background: var(--brass); color: var(--panel); border-color: var(--brass); }
+  .mode-btn .sub { display: block; font-size: 10.5px; font-weight: 500; color: inherit; opacity: 0.8; margin-top: 2px; }
+
+  .team-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 800; letter-spacing: 0.03em; }
+  .team-a { color: var(--brass); border: 1px solid var(--brass); }
+  .team-b { color: var(--red); border: 1px solid var(--red); }
+
+  .player-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1px solid var(--brass); color: var(--brass);
+    font-size: 11px; font-weight: 800; flex-shrink: 0;
+  }
+
+  .summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .summary > div { padding: 14px; text-align: center; background: var(--panel); }
+  .summary .amt { font-size: 24px; font-weight: 900; font-variant-numeric: tabular-nums; margin-top: 4px; }
+  .net-line { text-align: center; font-size: 13.5px; color: var(--creamDim); margin: -4px 0 14px; }
+  .net-line b { color: var(--ok); }
+
+  .progress { text-align: center; font-size: 12.5px; color: var(--creamDim); margin-bottom: 14px; }
+
+  .hole-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .hole-head .n { font-size: 22px; font-weight: 900; }
+  .pot-tag { font-size: 13px; color: var(--brass); font-weight: 700; }
+  .pot-tag .carry { color: var(--red); }
+
+  .bonus-banner {
+    background: linear-gradient(135deg, rgba(200,169,106,0.28), rgba(228,87,46,0.2));
+    border: 1px solid var(--brass);
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--brass);
+  }
+
+  .par-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .par-btn {
+    flex: 1; padding: 9px 0; background: transparent; color: var(--brass);
+    border: 1px solid var(--line); border-radius: 4px; font-weight: 700; font-size: 13px;
+  }
+  .par-btn.active { background: var(--brass); color: var(--panel); border-color: var(--brass); }
+
+  .player-block { margin-bottom: 14px; }
+  .player-block .pname { font-size: 14px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+  .chip {
+    padding: 6px 10px; background: transparent; color: var(--creamDim);
+    border: 1px solid var(--line); border-radius: 12px; font-size: 12px; font-weight: 700;
+  }
+
+  .player-input { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .player-input .pname { flex: 1; font-size: 14px; font-weight: 600; }
+  .player-input input { width: 72px; text-align: center; }
+
+  .hole-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 14px; border-top: 1px solid var(--line); font-size: 13.5px; cursor: pointer;
+  }
+  .hole-row:first-child { border-top: none; }
+  .hole-row .left { display: flex; gap: 10px; align-items: center; }
+  .hole-row .hn { color: var(--creamDim); width: 22px; }
+  .hole-row .result { font-weight: 700; }
+  .hole-row .result.win-a { color: var(--brass); }
+  .hole-row .result.win-b { color: var(--red); }
+  .hole-row .result.carry { color: var(--creamDim); }
+
+  .final-banner {
+    background: var(--panelLight);
+    border: 1px solid var(--ok);
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .final-banner .title { color: var(--ok); font-weight: 800; font-size: 13px; margin-bottom: 6px; }
+  .final-banner .amount { font-size: 26px; font-weight: 900; }
+
+  .empty-note {
+    padding: 16px;
+    text-align: center;
+    color: var(--creamDim);
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  table.result-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.result-table th, table.result-table td {
+    padding: 8px 6px; text-align: center; border-bottom: 1px solid var(--line);
+  }
+  table.result-table th { color: var(--brass); font-size: 11px; font-weight: 700; }
+  table.result-table td.name { text-align: left; font-weight: 700; }
+  table.result-table tr:first-child td { color: var(--ok); font-weight: 800; }
+
+  .settle-row {
+    display: flex; justify-content: space-between; padding: 10px 14px;
+    border-top: 1px solid var(--line); font-size: 13.5px;
+  }
+  .settle-row:first-child { border-top: none; }
+  .settle-row .amt.pos { color: var(--ok); font-weight: 800; }
+  .settle-row .amt.neg { color: var(--red); font-weight: 800; }
+
+  .peoria-list { font-size: 12.5px; color: var(--creamDim); line-height: 1.8; }
+  .section-gap { margin-top: 22px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const STORE_KEY = "golfScoring:state";
+const PLAYER_KEYS = ["a1", "a2", "b1", "b2"];
+const BONUS_MULTIPLIER = 2;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+function saveState(state) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(state));
+}
+function fmt(n) {
+  return n.toLocaleString("ko-KR");
+}
+
+// ---- 스킨스: 보너스 홀 뽑기 (전반 중 1홀, 후반 있으면 후반 중 1홀) ----
+function pickBonusHoles(totalHoles) {
+  const frontCount = Math.min(9, totalHoles);
+  const indices = [Math.floor(Math.random() * frontCount)];
+  if (totalHoles > 9) {
+    const backCount = totalHoles - 9;
+    indices.push(9 + Math.floor(Math.random() * backCount));
+  }
+  return indices;
+}
+
+// ---- 신페리오: 전/후반 각 6홀(총 12홀) 비복원 추출 ----
+function sample(arr, n) {
+  const copy = [...arr];
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const idx = Math.floor(Math.random() * copy.length);
+    out.push(copy.splice(idx, 1)[0]);
+  }
+  return out;
+}
+function pickPeoriaHoles() {
+  const front = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  const back = [9, 10, 11, 12, 13, 14, 15, 16, 17];
+  return [...sample(front, 6), ...sample(back, 6)].sort((a, b) => a - b);
+}
+
+// mode: "skins" | "peoria" | "both" — 신페리오가 포함되면 18홀 고정(페리오 홀 규칙상 필수).
+function newState(mode, names, totalHoles, skinsStake, peoriaStake) {
+  const needsSkins = mode !== "peoria";
+  const needsPeoria = mode !== "skins";
+  const bonusSet = needsSkins ? new Set(pickBonusHoles(totalHoles)) : new Set();
+  return {
+    mode,
+    names,          // {a1,a2,b1,b2}
+    totalHoles,
+    skinsStake,
+    peoriaStake,
+    peoriaHoles: needsPeoria ? pickPeoriaHoles() : [],
+    holes: Array.from({ length: totalHoles }, (_, i) => ({
+      par: null, a1: null, a2: null, b1: null, b2: null,
+      bonus: bonusSet.has(i) ? BONUS_MULTIPLIER : null,
+    })),
+  };
+}
+
+// 순수 계산(스킨스): 원본 입력값만 저장, 팀합산/승패/캐리오버/누적금액은 매번 다시 계산.
+function computeSkins(state) {
+  let carry = 0;
+  let totalA = 0, totalB = 0;
+  const rows = [];
+  for (let i = 0; i < state.holes.length; i++) {
+    const h = state.holes[i];
+    if (h.a1 == null || h.a2 == null || h.b1 == null || h.b2 == null) break;
+    const teamA = h.a1 + h.a2;
+    const teamB = h.b1 + h.b2;
+    const mult = h.bonus || 1;
+    const pot = (state.skinsStake + carry) * mult;
+    let winner;
+    if (teamA < teamB) { winner = "A"; totalA += pot; carry = 0; }
+    else if (teamB < teamA) { winner = "B"; totalB += pot; carry = 0; }
+    else { winner = "carry"; carry = pot; }
+    rows.push({ idx: i, ...h, teamA, teamB, winner, pot });
+  }
+  return { rows, carry, totalA, totalB, currentIdx: rows.length };
+}
+
+// 신페리오 핸디캡: 페리오 12홀 합계 × 1.5 = 추정 스코어, (추정 스코어 - 코스파) × 0.8 = 핸디캡(반올림).
+// 넷스코어 = 총타수 - 핸디캡. 모든 쌍(i,j)이 넷스코어 차이 × 타당 금액으로 주고받는 제로섬 정산.
+function computePeoria(state) {
+  const coursePar = state.holes.reduce((s, h) => s + (h.par || 0), 0);
+  const results = PLAYER_KEYS.map((key) => {
+    const total = state.holes.reduce((s, h) => s + h[key], 0);
+    const peoriaSum = state.peoriaHoles.reduce((s, idx) => s + state.holes[idx][key], 0);
+    const estimated = peoriaSum * 1.5;
+    const handicap = Math.round((estimated - coursePar) * 0.8);
+    const net = total - handicap;
+    return { key, name: state.names[key], total, peoriaSum, estimated, handicap, net, settle: 0 };
+  });
+
+  const pairwise = [];
+  for (let i = 0; i < results.length; i++) {
+    for (let j = i + 1; j < results.length; j++) {
+      const a = results[i], b = results[j];
+      const diff = b.net - a.net; // b가 못 쳤으면(net이 크면) b가 a에게 지급
+      const amount = diff * state.peoriaStake;
+      a.settle += amount;
+      b.settle -= amount;
+      if (amount !== 0) {
+        pairwise.push(amount > 0
+          ? { from: b.name, to: a.name, amount }
+          : { from: a.name, to: b.name, amount: -amount });
+      }
+    }
+  }
+
+  results.sort((x, y) => x.net - y.net);
+  return { coursePar, results, pairwise };
+}
+
+// 파 대비 스코어 용어 — 칩 버튼과 홀별 기록 표시에 공용으로 쓴다.
+// "트리플+"처럼 "이상"을 뜻하는 라벨을 쓰면 눌렀을 때 실제로는 +3만 들어가는 것과 헷갈려서
+// (파4에서 4오버를 의도하고 이 칩을 눌렀지만 실제로는 3오버=7타만 저장된 사례) 델타를 하나씩 명확히 늘어놓는다.
+const REL_CHIPS = [
+  { delta: -2, label: "이글" },
+  { delta: -1, label: "버디" },
+  { delta: 0, label: "파" },
+  { delta: 1, label: "보기" },
+  { delta: 2, label: "더블" },
+  { delta: 3, label: "트리플" },
+  { delta: 4, label: "+4" },
+  { delta: 5, label: "+5" },
+];
+// 양파는 파 기준 상대타수가 아니라 "무조건 8타"를 가리키는 관용 표현이라 절대값으로 따로 둔다.
+const ONYANG_STROKES = 8;
+
+function holeLabel(v, par) {
+  if (v === ONYANG_STROKES) return "양파";
+  const found = REL_CHIPS.find((c) => c.delta === v - par);
+  if (found) return found.label;
+  const delta = v - par;
+  return delta > 0 ? `+${delta}` : `${delta}`;
+}
+
+function defaultPar(state, beforeIdx) {
+  for (let i = beforeIdx - 1; i >= 0; i--) {
+    if (state.holes[i].par != null) return state.holes[i].par;
+  }
+  return 4;
+}
+
+// 완료된 홀 수 — par와 4명 타수가 전부 채워진 선두 구간 길이.
+function countDone(state) {
+  let n = 0;
+  for (const h of state.holes) {
+    if (h.par == null || PLAYER_KEYS.some((k) => h[k] == null)) break;
+    n++;
+  }
+  return n;
+}
+
+let state = loadState();
+let editingIdx = null; // 과거 홀 재입력 중이면 해당 인덱스
+let pendingPar = null; // 현재 카드에서 고른 파 — { idx, par }
+let setupMode = "both"; // 설정 화면에서 고르는 중인 모드(시작 전)
+let setupHoles = 18;
+
+const root = document.getElementById("app");
+
+function render() {
+  if (!state) {
+    renderSetup();
+  } else if (countDone(state) >= state.totalHoles) {
+    renderFinal();
+  } else {
+    renderPlay();
+  }
+}
+
+const MODE_INFO = {
+  skins: { title: "스킨스 정산", label: "스킨스만", sub: "2v2 팀전" },
+  both: { title: "스킨스 + 신페리오", label: "합쳐서", sub: "한 번 입력" },
+  peoria: { title: "신페리오 개인전", label: "신페리오만", sub: "4인 개인전" },
+};
+
+function renderSetup() {
+  const needsSkins = setupMode !== "peoria";
+  const needsPeoria = setupMode !== "skins";
+
+  root.innerHTML = `
+    <h1>골프 스코어 정산</h1>
+    <div class="subtitle">스코어는 한 번만 입력하고, 선택한 모드에 맞춰 스킨스·신페리오 결과를 계산합니다.</div>
+    <div class="card">
+      <label>모드</label>
+      <div class="row3">
+        <button class="mode-btn" id="modeSkins">스킨스만<span class="sub">2v2 팀전</span></button>
+        <button class="mode-btn" id="modeBoth">합쳐서<span class="sub">한 번 입력</span></button>
+        <button class="mode-btn" id="modePeoria">신페리오만<span class="sub">4인 개인전</span></button>
+      </div>
+
+      <label>선수 이름${needsSkins ? " (A팀 / B팀)" : ""}</label>
+      <div class="row2">
+        <input type="text" id="a1" placeholder="${needsSkins ? "A팀 선수1" : "선수1"}" value="${needsSkins ? "A1" : "선수1"}" />
+        <input type="text" id="a2" placeholder="${needsSkins ? "A팀 선수2" : "선수2"}" value="${needsSkins ? "A2" : "선수2"}" />
+      </div>
+      <div class="row2" style="margin-top:10px;">
+        <input type="text" id="b1" placeholder="${needsSkins ? "B팀 선수1" : "선수3"}" value="${needsSkins ? "B1" : "선수3"}" />
+        <input type="text" id="b2" placeholder="${needsSkins ? "B팀 선수2" : "선수4"}" value="${needsSkins ? "B2" : "선수4"}" />
+      </div>
+
+      <div id="holesField" class="${needsPeoria ? "hidden" : ""}">
+        <label>홀 수</label>
+        <div class="row2">
+          <button class="btn-ghost" id="holes9" style="padding:11px 0;">9홀</button>
+          <button class="btn-ghost" id="holes18" style="padding:11px 0;">18홀</button>
+        </div>
+      </div>
+      <div class="subtitle ${needsPeoria ? "" : "hidden"}" style="margin:12px 0 0;">신페리오가 포함되면 18홀 고정입니다.</div>
+
+      <div id="skinsStakeField" class="${needsSkins ? "" : "hidden"}">
+        <label>홀당 판돈 (원)</label>
+        <input type="number" id="skinsStake" value="10000" step="1000" min="1000" />
+      </div>
+      <div id="peoriaStakeField" class="${needsPeoria ? "" : "hidden"}">
+        <label>타당 금액 (원, 신페리오)</label>
+        <input type="number" id="peoriaStake" value="10000" step="10000" min="10000" />
+      </div>
+
+      <button class="btn-primary" id="startBtn">시작</button>
+    </div>
+  `;
+
+  paintModeButtons();
+
+  document.getElementById("modeSkins").onclick = () => { setupMode = "skins"; renderSetup(); };
+  document.getElementById("modeBoth").onclick = () => { setupMode = "both"; renderSetup(); };
+  document.getElementById("modePeoria").onclick = () => { setupMode = "peoria"; renderSetup(); };
+
+  if (needsSkins) {
+    const h9 = document.getElementById("holes9");
+    const h18 = document.getElementById("holes18");
+    function paintHoleButtons() {
+      h9.style.background = setupHoles === 9 ? "var(--cream)" : "transparent";
+      h9.style.color = setupHoles === 9 ? "var(--bg)" : "var(--brass)";
+      h18.style.background = setupHoles === 18 ? "var(--cream)" : "transparent";
+      h18.style.color = setupHoles === 18 ? "var(--bg)" : "var(--brass)";
+    }
+    paintHoleButtons();
+    h9.onclick = () => { setupHoles = 9; paintHoleButtons(); };
+    h18.onclick = () => { setupHoles = 18; paintHoleButtons(); };
+  }
+
+  document.getElementById("startBtn").onclick = () => {
+    const names = {
+      a1: document.getElementById("a1").value.trim() || (needsSkins ? "A1" : "선수1"),
+      a2: document.getElementById("a2").value.trim() || (needsSkins ? "A2" : "선수2"),
+      b1: document.getElementById("b1").value.trim() || (needsSkins ? "B1" : "선수3"),
+      b2: document.getElementById("b2").value.trim() || (needsSkins ? "B2" : "선수4"),
+    };
+    const totalHoles = needsPeoria ? 18 : setupHoles;
+    const skinsStakeEl = document.getElementById("skinsStake");
+    const peoriaStakeEl = document.getElementById("peoriaStake");
+    const skinsStake = needsSkins ? Math.max(1000, parseInt(skinsStakeEl.value, 10) || 10000) : 0;
+    const peoriaStake = needsPeoria ? Math.max(10000, parseInt(peoriaStakeEl.value, 10) || 10000) : 0;
+    state = newState(setupMode, names, totalHoles, skinsStake, peoriaStake);
+    saveState(state);
+    editingIdx = null;
+    pendingPar = null;
+    render();
+  };
+}
+
+function paintModeButtons() {
+  document.getElementById("modeSkins").classList.toggle("active", setupMode === "skins");
+  document.getElementById("modeBoth").classList.toggle("active", setupMode === "both");
+  document.getElementById("modePeoria").classList.toggle("active", setupMode === "peoria");
+}
+
+function renderPlay() {
+  const needsSkins = state.mode !== "peoria";
+  const needsPeoria = state.mode !== "skins";
+  const skins = needsSkins ? computeSkins(state) : null;
+  const done = countDone(state);
+  const title = MODE_INFO[state.mode].title;
+
+  let html = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin:16px 0 4px;">
+      <h1 style="margin:0;">${title}</h1>
+      <button class="btn-ghost" id="resetBtn">새 라운드</button>
+    </div>
+  `;
+
+  if (needsSkins) {
+    html += `
+      <div class="subtitle">${state.names.a1}·${state.names.a2} <span class="team-badge team-a">A팀</span>
+        &nbsp;vs&nbsp;
+        ${state.names.b1}·${state.names.b2} <span class="team-badge team-b">B팀</span>
+        · 홀당 ${fmt(state.skinsStake)}원 · ${state.totalHoles}홀${needsPeoria ? " · 신페리오 동시 진행 중" : ""}</div>
+    `;
+    const net = skins.totalA - skins.totalB;
+    html += `
+      <div class="summary">
+        <div><span class="team-badge team-a">A팀</span><div class="amt" style="color:var(--brass)">${fmt(skins.totalA)}원</div></div>
+        <div><span class="team-badge team-b">B팀</span><div class="amt" style="color:var(--red)">${fmt(skins.totalB)}원</div></div>
+      </div>
+      <div class="net-line">
+        ${net === 0 ? "현재 동률" : net > 0
+          ? `<b>B팀이 A팀에게 ${fmt(Math.abs(net))}원</b> 지급 상황`
+          : `<b>A팀이 B팀에게 ${fmt(Math.abs(net))}원</b> 지급 상황`}
+      </div>
+    `;
+  } else {
+    html += `<div class="progress">${done}/${state.totalHoles}홀 완료 · 페리오 홀과 핸디캡은 18홀 종료 후 공개됩니다</div>`;
+  }
+
+  const holeNum = done + 1;
+  const editIdx = editingIdx != null ? editingIdx : done;
+  const editingPast = editingIdx != null;
+  const existing = state.holes[editIdx];
+
+  const potForThisHole = needsSkins
+    ? (editingPast
+        ? (skins.rows[editIdx] ? skins.rows[editIdx].pot : state.skinsStake)
+        : (state.skinsStake + skins.carry) * (existing.bonus || 1))
+    : null;
+
+  if (!pendingPar || pendingPar.idx !== editIdx) {
+    pendingPar = { idx: editIdx, par: existing.par ?? defaultPar(state, editIdx) };
+  }
+  const par = pendingPar.par;
+
+  const playerRow = (key, label, teamClass, teamLetter) => `
+    <div class="player-block">
+      <div class="pname">
+        ${needsSkins
+          ? `<span class="team-badge ${teamClass}">${teamLetter}</span>`
+          : `<span class="player-badge">${label.charAt(0)}</span>`}
+        ${label}
+      </div>
+      <div class="chip-row">
+        ${REL_CHIPS.map((c) => `<button class="chip" data-key="${key}" data-delta="${c.delta}">${c.label}</button>`).join("")}
+        <button class="chip" data-key="${key}" data-abs="${ONYANG_STROKES}">양파</button>
+      </div>
+      <input type="number" id="in_${key}" inputmode="numeric" value="${existing[key] ?? ""}" placeholder="직접 입력" />
+    </div>
+  `;
+
+  html += `
+    <div class="card">
+      ${needsSkins && existing.bonus ? `<div class="bonus-banner">🎁 보너스 홀! 이번 홀 판돈 ×${existing.bonus}</div>` : ""}
+      <div class="hole-head">
+        <span class="n">${editingPast ? editIdx + 1 : holeNum}홀${editingPast ? " (수정)" : ""}</span>
+        ${needsSkins ? `
+          <span class="pot-tag">
+            이번 홀 ${fmt(potForThisHole)}원
+            ${!editingPast && skins.carry > 0 ? `<span class="carry">(이월 ${fmt(skins.carry)}원 포함)</span>` : ""}
+          </span>
+        ` : ""}
+      </div>
+      <div class="par-row">
+        ${[3, 4, 5].map((p) => `<button class="par-btn ${p === par ? "active" : ""}" data-par="${p}">파${p}</button>`).join("")}
+      </div>
+      ${playerRow("a1", state.names.a1, "team-a", "A")}
+      ${playerRow("a2", state.names.a2, "team-a", "A")}
+      ${playerRow("b1", state.names.b1, "team-b", "B")}
+      ${playerRow("b2", state.names.b2, "team-b", "B")}
+      <button class="btn-primary" id="confirmBtn">${editingPast ? "수정 저장" : "확정"}</button>
+      ${editingPast ? `<button class="btn-ghost" id="cancelEditBtn" style="width:100%; margin-top:8px; text-align:center;">취소</button>` : ""}
+    </div>
+  `;
+
+  html += `<label class="section-gap">홀별 기록</label>`;
+  if (needsSkins) {
+    if (skins.rows.length === 0) {
+      html += `<div class="card"><div class="empty-note">아직 확정된 홀이 없습니다</div></div>`;
+    } else {
+      html += `<div class="card" style="padding:0;">`;
+      for (const r of [...skins.rows].reverse()) {
+        const bonusTag = r.bonus ? ` (보너스×${r.bonus})` : "";
+        const resultText = r.winner === "carry"
+          ? `캐리오버${bonusTag}`
+          : r.winner === "A"
+          ? `A팀 +${fmt(r.pot)}원${bonusTag}`
+          : `B팀 +${fmt(r.pot)}원${bonusTag}`;
+        const resultClass = r.winner === "carry" ? "carry" : r.winner === "A" ? "win-a" : "win-b";
+        const rPar = r.par ?? 4;
+        const relStr = (v) => holeLabel(v, rPar);
+        html += `
+          <div class="hole-row" data-idx="${r.idx}">
+            <div class="left">
+              <span class="hn">${r.idx + 1}</span>
+              <span>파${rPar} · ${r.a1}(${relStr(r.a1)})+${r.a2}(${relStr(r.a2)})=${r.teamA}
+                vs ${r.b1}(${relStr(r.b1)})+${r.b2}(${relStr(r.b2)})=${r.teamB}</span>
+            </div>
+            <span class="result ${resultClass}">${resultText}</span>
+          </div>
+        `;
+      }
+      html += `</div>`;
+    }
+  } else {
+    if (done === 0) {
+      html += `<div class="card"><div class="empty-note">아직 확정된 홀이 없습니다</div></div>`;
+    } else {
+      html += `<div class="card" style="padding:0;">`;
+      for (let i = done - 1; i >= 0; i--) {
+        const h = state.holes[i];
+        const parts = PLAYER_KEYS.map((k) => `${state.names[k]} ${h[k]}(${holeLabel(h[k], h.par)})`).join(" · ");
+        html += `
+          <div class="hole-row" data-idx="${i}">
+            <div class="left">
+              <span class="hn">${i + 1}</span>
+              <span>파${h.par} · ${parts}</span>
+            </div>
+          </div>
+        `;
+      }
+      html += `</div>`;
+    }
+  }
+
+  root.innerHTML = html;
+
+  const confirmBtn = document.getElementById("confirmBtn");
+  confirmBtn.onclick = () => {
+    const a1 = parseInt(document.getElementById("in_a1").value, 10);
+    const a2 = parseInt(document.getElementById("in_a2").value, 10);
+    const b1 = parseInt(document.getElementById("in_b1").value, 10);
+    const b2 = parseInt(document.getElementById("in_b2").value, 10);
+    if ([a1, a2, b1, b2].some((v) => isNaN(v) || v <= 0)) {
+      alert("4명 타수를 모두 입력하세요.");
+      return;
+    }
+    const idx = editingIdx != null ? editingIdx : done;
+    state.holes[idx] = { ...state.holes[idx], par: pendingPar.par, a1, a2, b1, b2 };
+    saveState(state);
+    editingIdx = null;
+    render();
+  };
+
+  document.querySelectorAll(".par-btn").forEach((el) => {
+    el.onclick = () => {
+      pendingPar = { idx: pendingPar.idx, par: parseInt(el.dataset.par, 10) };
+      render();
+    };
+  });
+
+  document.querySelectorAll(".chip").forEach((el) => {
+    el.onclick = () => {
+      const key = el.dataset.key;
+      const value = el.dataset.abs != null
+        ? parseInt(el.dataset.abs, 10)
+        : pendingPar.par + parseInt(el.dataset.delta, 10);
+      document.getElementById(`in_${key}`).value = value;
+    };
+  });
+
+  const cancelBtn = document.getElementById("cancelEditBtn");
+  if (cancelBtn) cancelBtn.onclick = () => { editingIdx = null; pendingPar = null; render(); };
+
+  document.querySelectorAll(".hole-row").forEach((el) => {
+    el.onclick = () => {
+      editingIdx = parseInt(el.dataset.idx, 10);
+      pendingPar = null;
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+  });
+
+  bindResetButton();
+}
+
+function renderFinal() {
+  const needsSkins = state.mode !== "peoria";
+  const needsPeoria = state.mode !== "skins";
+  const title = MODE_INFO[state.mode].title;
+
+  let html = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin:16px 0 4px;">
+      <h1 style="margin:0;">${title}</h1>
+      <button class="btn-ghost" id="resetBtn">새 라운드</button>
+    </div>
+  `;
+
+  if (needsSkins) {
+    const skins = computeSkins(state);
+    const net = skins.totalA - skins.totalB;
+    html += `
+      <div class="summary">
+        <div><span class="team-badge team-a">A팀</span><div class="amt" style="color:var(--brass)">${fmt(skins.totalA)}원</div></div>
+        <div><span class="team-badge team-b">B팀</span><div class="amt" style="color:var(--red)">${fmt(skins.totalB)}원</div></div>
+      </div>
+      <div class="final-banner">
+        <div class="title">스킨스 · 최종 정산</div>
+        <div class="amount" style="color:${net === 0 ? "var(--creamDim)" : "var(--ok)"}">
+          ${net === 0 ? "무승부" : net > 0
+            ? `B팀 → A팀 ${fmt(Math.abs(net))}원`
+            : `A팀 → B팀 ${fmt(Math.abs(net))}원`}
+        </div>
+        <div style="font-size:12px; color:var(--creamDim); margin-top:8px;">
+          ${net !== 0 ? `1인당 ${fmt(Math.round(Math.abs(net) / 2))}원씩` : ""}
+        </div>
+      </div>
+    `;
+  }
+
+  if (needsPeoria) {
+    const { coursePar, results, pairwise } = computePeoria(state);
+    html += `
+      <div class="final-banner">
+        <div class="title">신페리오 · 결과 공개</div>
+        <div style="font-size:13px; color:var(--creamDim);">코스 파 ${coursePar} · 페리오 홀(전/후반 각 6홀)</div>
+        <div class="peoria-list" style="margin-top:6px;">${state.peoriaHoles.map((i) => i + 1).join(", ")}번 홀</div>
+      </div>
+
+      <label>신페리오 순위</label>
+      <div class="card">
+        <table class="result-table">
+          <tr><th>순위</th><th style="text-align:left;">이름</th><th>총타수</th><th>핸디</th><th>넷스코어</th></tr>
+          ${results.map((r, i) => `
+            <tr>
+              <td>${i + 1}</td>
+              <td class="name">${r.name}</td>
+              <td>${r.total}</td>
+              <td>${r.handicap}</td>
+              <td>${r.net}</td>
+            </tr>
+          `).join("")}
+        </table>
+      </div>
+
+      <label>신페리오 정산 (받으면 초록, 내면 빨강)</label>
+      <div class="card" style="padding:0;">
+        ${results.map((r) => `
+          <div class="settle-row">
+            <span>${r.name}</span>
+            <span class="amt ${r.settle >= 0 ? "pos" : "neg"}">${r.settle >= 0 ? "+" : ""}${fmt(r.settle)}원</span>
+          </div>
+        `).join("")}
+      </div>
+
+      <label>신페리오 · 누가 누구에게</label>
+      <div class="card" style="padding:0;">
+        ${pairwise.length === 0
+          ? `<div class="empty-note">전원 넷스코어 동률 — 정산 없음</div>`
+          : pairwise.map((p) => `
+            <div class="settle-row">
+              <span>${p.from} → ${p.to}</span>
+              <span class="amt pos">${fmt(p.amount)}원</span>
+            </div>
+          `).join("")}
+      </div>
+    `;
+  }
+
+  html += `<label class="section-gap">홀별 기록</label>`;
+  html += `<div class="card" style="padding:0;">`;
+  for (let i = state.totalHoles - 1; i >= 0; i--) {
+    const h = state.holes[i];
+    const parts = PLAYER_KEYS.map((k) => `${state.names[k]} ${h[k]}(${holeLabel(h[k], h.par)})`).join(" · ");
+    html += `
+      <div class="hole-row" style="cursor:default;">
+        <div class="left">
+          <span class="hn">${i + 1}</span>
+          <span>파${h.par} · ${parts}</span>
+        </div>
+      </div>
+    `;
+  }
+  html += `</div>`;
+
+  root.innerHTML = html;
+
+  bindResetButton();
+}
+
+function bindResetButton() {
+  const resetBtn = document.getElementById("resetBtn");
+  if (resetBtn) {
+    resetBtn.onclick = () => {
+      if (confirm("새 라운드를 시작하면 현재 기록이 사라집니다. 계속할까요?")) {
+        localStorage.removeItem(STORE_KEY);
+        state = null;
+        editingIdx = null;
+        pendingPar = null;
+        render();
+      }
+    };
+  }
+}
+
+render();
+</script>
+</body>
+</html>
