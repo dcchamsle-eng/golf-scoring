@@ -336,7 +336,9 @@ const BONUS_MULTIPLIER = 2;
 // club/courseFront/courseBack은 전부 선택 입력 — 기본값 빈 문자열.
 // 코스를 전/후반으로 나눈 이유: 많은 골프장이 "동코스+서코스"처럼 9홀짜리 코스를 조합해서 18홀을 만들고,
 // 전반과 후반이 다른 코스인 경우가 흔하다(스코어카드 자체가 전/후반 다른 코스 파 정보를 가진 경우도 있음).
-function newState(mode, names, totalHoles, skinsStake, peoriaStake, club = "", courseFront = "", courseBack = "") {
+// players(v2, {a1,a2,b1,b2}: playerId|null)와 seasonId(T3용, 지금은 항상 null)는 파라미터가 이미
+// 8개라 옵션 객체로 받는다 — newGroupState와 같은 스타일.
+function newState({ mode, names, totalHoles, skinsStake, peoriaStake, club = "", courseFront = "", courseBack = "", players = null, seasonId = null }) {
   const needsSkins = mode !== "peoria";
   const needsPeoria = mode !== "skins";
   const bonusSet = needsSkins ? new Set(pickBonusHoles(totalHoles)) : new Set();
@@ -350,6 +352,8 @@ function newState(mode, names, totalHoles, skinsStake, peoriaStake, club = "", c
     club,
     courseFront,
     courseBack,
+    players,        // v2: {a1,a2,b1,b2}: playerId|null — 선수 등록부 연결용, 계산에는 아직 안 씀
+    seasonId,       // T3(시즌)용 자리. 지금은 항상 null
     peoriaHoles: needsPeoria ? pickPeoriaHoles() : [],
     holes: Array.from({ length: totalHoles }, (_, i) => ({
       par: null, a1: null, a2: null, b1: null, b2: null,
@@ -449,7 +453,11 @@ function newGroupState(opts) {
     courseBack: opts.courseBack || "",
     usePeoria: opts.usePeoria,
     excludeGross: opts.excludeGross,
-    players: opts.players.map((p) => ({ id: uid(), name: p.name, cart: p.cart })),
+    // playerId(v2, 선수 등록부 참조)는 id(이 라운드 안에서만 쓰는 임시 키 — scores/nearest/longest가
+    // 이걸로 사람을 가리킨다)와 별개다. id를 playerId로 바꾸면 기존 계산 코드를 다 건드려야 해서
+    // 그대로 두고 playerId만 나란히 붙인다.
+    players: opts.players.map((p) => ({ id: uid(), name: p.name, cart: p.cart, playerId: p.playerId ?? null })),
+    seasonId: opts.seasonId ?? null, // T3(시즌)용 자리. 지금은 항상 null
     totalHoles,
     peoriaHoles: opts.usePeoria ? pickPeoriaHoles() : [],
     holes: Array.from({ length: totalHoles }, () => ({
@@ -678,7 +686,109 @@ function fallbackCopy(text, done) {
 }
 
 
+// ---- core/players.js ----
+
+// 정확히 같은 이름 문자열이면 같은 사람으로 본다 — 동명이인 구분용 UI는 없다(선택 UX: 텍스트 입력 +
+// 자동 매칭). archived(더 이상 안 나오는 사람)는 매칭 대상에서 뺀다 — 옛 사람 이름이 우연히 다시
+// 나와도 조용히 되살아나지 않고 새 선수로 만들어지는 편이 안전하다.
+// 배열을 직접 바꾸지 않고 새 배열을 돌려준다 — 호출자가 players를 계속 스레딩해서 쓴다(마이그레이션이
+// 여러 이름을 순서대로 resolve할 때 누적된 결과를 다음 호출에 넘겨야 하기 때문).
+function resolvePlayer(players, name) {
+  const trimmed = String(name || "").trim();
+  if (!trimmed) return { players, id: null };
+
+  const existing = players.find((p) => !p.archived && p.name === trimmed);
+  if (existing) return { players, id: existing.id };
+
+  const created = { id: uid(), name: trimmed, aliases: [], createdAt: Date.now(), archived: false };
+  return { players: [...players, created], id: created.id };
+}
+
+
+// ---- data/players.js ----
+
+const PLAYERS_KEY = "golfScoring:players";
+
+function loadPlayers() {
+  try {
+    const raw = localStorage.getItem(PLAYERS_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+function savePlayers(players) {
+  localStorage.setItem(PLAYERS_KEY, JSON.stringify(players));
+}
+
+// 설정 화면에서 이름을 입력받았을 때 쓴다 — 기존 선수면 그 id를, 아니면 새로 등록하고 그 id를 돌려준다.
+function resolvePlayerAndSave(name) {
+  const players = loadPlayers();
+  const { players: next, id } = resolvePlayer(players, name);
+  if (next !== players) savePlayers(next); // 새로 만들어진 경우에만 쓴다 — 매번 저장할 필요 없음
+  return id;
+}
+
+
+// ---- data/schema.js ----
+
+const SCHEMA_KEY = "golfScoring:schemaVersion";
+
+// 순수 변환: 이미 JSON.parse된 state/rounds/players를 받아 v2 모양으로 바꿔 돌려준다.
+// localStorage를 직접 만지지 않는다 — 그래서 jsdom 없이 그냥 Node에서 테스트할 수 있다.
+// names/name 필드는 그대로 남긴다(롤백 대비, docs/DATA_MODEL.md 마이그레이션 규칙 4번) — 화면 표시나
+// computeSkins/computePeoria/computeGroup은 지금 그대로 이 필드들을 쓰고, players/playerId는 T3
+// 시즌 랭킹을 위한 신규 연결고리일 뿐 기존 계산에는 아직 관여하지 않는다.
+function migrateStore({ state, rounds, players }) {
+  let registry = Array.isArray(players) ? players : [];
+
+  function resolve(name) {
+    const result = resolvePlayer(registry, name);
+    registry = result.players;
+    return result.id;
+  }
+
+  function migrateRound(round) {
+    if (!round) return round;
+    if (round.mode === "group") {
+      const migratedPlayers = round.players.map((p) => ({ ...p, playerId: resolve(p.name) }));
+      return { ...round, players: migratedPlayers, seasonId: round.seasonId ?? null };
+    }
+    const playerIds = {};
+    for (const k of ["a1", "a2", "b1", "b2"]) playerIds[k] = resolve(round.names[k]);
+    return { ...round, players: playerIds, seasonId: round.seasonId ?? null };
+  }
+
+  const migratedState = migrateRound(state);
+  const migratedRounds = (rounds || []).map((entry) => ({ ...entry, state: migrateRound(entry.state) }));
+
+  return { state: migratedState, rounds: migratedRounds, players: registry };
+}
+
+// 앱 부팅 시, render() 전에 단 한 번 호출한다. schemaVersion이 2 이상이면 손대지 않는다.
+// 예외가 나면 아무것도 저장하지 않고 v1 상태로 계속 동작한다 — 반쯤 바뀐 데이터가 남는 게 최악이다.
+function migrateIfNeeded() {
+  const version = parseInt(localStorage.getItem(SCHEMA_KEY) || "1", 10);
+  if (version >= 2) return;
+
+  try {
+    const rawState = localStorage.getItem(STORE_KEY);
+    const state = rawState ? JSON.parse(rawState) : null;
+    const rounds = JSON.parse(localStorage.getItem(ROUNDS_KEY) || "[]");
+    const result = migrateStore({ state, rounds, players: [] });
+
+    if (result.state) localStorage.setItem(STORE_KEY, JSON.stringify(result.state));
+    localStorage.setItem(ROUNDS_KEY, JSON.stringify(result.rounds));
+    localStorage.setItem(PLAYERS_KEY, JSON.stringify(result.players));
+    localStorage.setItem(SCHEMA_KEY, "2");
+  } catch (e) {
+    // 아무것도 쓰지 않는다.
+  }
+}
+
+
 // ---- ui/app.js ----
+
+migrateIfNeeded(); // v1 데이터가 있으면 렌더 전에 한 번 v2로 올린다 (docs/DATA_MODEL.md 마이그레이션 규칙)
 
 let state = loadState();
 let editingIdx = null; // 과거 홀 재입력 중이면 해당 인덱스
@@ -832,7 +942,12 @@ function renderSetup() {
     const club = document.getElementById("club").value.trim();
     const courseFront = document.getElementById("courseFront").value.trim();
     const courseBack = document.getElementById("courseBack").value.trim();
-    state = newState(setupMode, names, totalHoles, skinsStake, peoriaStake, club, courseFront, courseBack);
+    // 이름 그대로 등록부에서 찾거나 새로 만든다 — 화면은 안 바뀌고 뒤에서 조용히 연결만 된다.
+    const players = {
+      a1: resolvePlayerAndSave(names.a1), a2: resolvePlayerAndSave(names.a2),
+      b1: resolvePlayerAndSave(names.b1), b2: resolvePlayerAndSave(names.b2),
+    };
+    state = newState({ mode: setupMode, names, totalHoles, skinsStake, peoriaStake, club, courseFront, courseBack, players });
     saveState(state);
     editingIdx = null;
     pendingPar = null;
@@ -1392,7 +1507,9 @@ function renderGroupSetup() {
       const n = (seen.get(name) || 0) + 1;
       seen.set(name, n);
       if (n > 1) name = `${name}(${n})`;
-      return { name, cart: p.cart };
+      // 등록부 연결도 화면에 실제로 보이는(중복 접미사 붙은) 이름 기준으로 한다 —
+      // 한 라운드에 동명이인이 있으면 "철수"와 "철수(2)"를 별개 선수로 본다.
+      return { name, cart: p.cart, playerId: resolvePlayerAndSave(name) };
     });
     if (list.length < 2) { alert("참가자를 2명 이상 넣어주세요."); return; }
     state = newGroupState({
