@@ -333,8 +333,10 @@ const PLAYER_KEYS = ["a1", "a2", "b1", "b2"];
 const BONUS_MULTIPLIER = 2;
 
 // mode: "skins" | "peoria" | "both" — 신페리오가 포함되면 18홀 고정(페리오 홀 규칙상 필수).
-// club/course는 둘 다 선택 입력(골프장이 코스를 여러 개 운영하는 경우가 많아 따로 받는다) — 기본값 빈 문자열.
-function newState(mode, names, totalHoles, skinsStake, peoriaStake, club = "", course = "") {
+// club/courseFront/courseBack은 전부 선택 입력 — 기본값 빈 문자열.
+// 코스를 전/후반으로 나눈 이유: 많은 골프장이 "동코스+서코스"처럼 9홀짜리 코스를 조합해서 18홀을 만들고,
+// 전반과 후반이 다른 코스인 경우가 흔하다(스코어카드 자체가 전/후반 다른 코스 파 정보를 가진 경우도 있음).
+function newState(mode, names, totalHoles, skinsStake, peoriaStake, club = "", courseFront = "", courseBack = "") {
   const needsSkins = mode !== "peoria";
   const needsPeoria = mode !== "skins";
   const bonusSet = needsSkins ? new Set(pickBonusHoles(totalHoles)) : new Set();
@@ -346,7 +348,8 @@ function newState(mode, names, totalHoles, skinsStake, peoriaStake, club = "", c
     skinsStake,
     peoriaStake,
     club,
-    course,
+    courseFront,
+    courseBack,
     peoriaHoles: needsPeoria ? pickPeoriaHoles() : [],
     holes: Array.from({ length: totalHoles }, (_, i) => ({
       par: null, a1: null, a2: null, b1: null, b2: null,
@@ -442,7 +445,8 @@ function newGroupState(opts) {
     startedAt: Date.now(),
     title: opts.title,
     club: opts.club || "",
-    course: opts.course || "",
+    courseFront: opts.courseFront || "",
+    courseBack: opts.courseBack || "",
     usePeoria: opts.usePeoria,
     excludeGross: opts.excludeGross,
     players: opts.players.map((p) => ({ id: uid(), name: p.name, cart: p.cart })),
@@ -689,7 +693,8 @@ let viewing = null;     // 보관함에서 열어본 지난 라운드(읽기 전
 let setupGroup = {
   title: "",
   club: "",
-  course: "",
+  courseFront: "",
+  courseBack: "",
   usePeoria: true,
   excludeGross: false,
   players: Array.from({ length: 8 }, (_, i) => ({ name: "", cart: Math.floor(i / 4) + 1 })),
@@ -751,9 +756,10 @@ function renderSetup() {
       <button class="mode-btn mode-wide" id="modeGroup">단체전 스코어카드<span class="sub">8명 이상 · 롱기/니어/시상</span></button>
 
       <label>골프장 (선택)</label>
-      <div class="row2">
-        <input type="text" id="club" placeholder="예) OO CC" value="" />
-        <input type="text" id="course" placeholder="코스(예: 동코스)" value="" />
+      <input type="text" id="club" placeholder="예) OO CC" value="" />
+      <div class="row2" style="margin-top:10px;">
+        <input type="text" id="courseFront" placeholder="전반 코스 (예: 동코스)" value="" />
+        <input type="text" id="courseBack" placeholder="후반 코스 (예: 서코스)" value="" />
       </div>
 
       <label>선수 이름${needsSkins ? " (A팀 / B팀)" : ""}</label>
@@ -824,8 +830,9 @@ function renderSetup() {
     const skinsStake = needsSkins ? Math.max(1000, parseInt(skinsStakeEl.value, 10) || 10000) : 0;
     const peoriaStake = needsPeoria ? Math.max(10000, parseInt(peoriaStakeEl.value, 10) || 10000) : 0;
     const club = document.getElementById("club").value.trim();
-    const course = document.getElementById("course").value.trim();
-    state = newState(setupMode, names, totalHoles, skinsStake, peoriaStake, club, course);
+    const courseFront = document.getElementById("courseFront").value.trim();
+    const courseBack = document.getElementById("courseBack").value.trim();
+    state = newState(setupMode, names, totalHoles, skinsStake, peoriaStake, club, courseFront, courseBack);
     saveState(state);
     editingIdx = null;
     pendingPar = null;
@@ -841,9 +848,15 @@ function paintModeButtons() {
   }
 }
 
-// 골프장/코스 표시용 — 둘 다 선택 입력이라 있는 것만 이어 붙인다.
+// 골프장/코스 표시용 — 전반·후반 코스가 같으면 한 번만, 다르면 "동코스·서코스"처럼 붙인다.
+function courseLabel(st) {
+  const front = (st.courseFront || "").trim();
+  const back = (st.courseBack || "").trim();
+  if (front && back) return front === back ? front : `${front}·${back}`;
+  return front || back || "";
+}
 function venueLabel(st) {
-  return [st.club, st.course].filter((v) => v && v.trim()).join(" · ");
+  return [st.club, courseLabel(st)].filter((v) => v && v.trim()).join(" · ");
 }
 
 // ---- 보관함 목록(설정 화면 하단) ----
@@ -1238,9 +1251,11 @@ function syncGroupInputs() {
   const titleEl = document.getElementById("gTitle");
   if (titleEl) setupGroup.title = titleEl.value;
   const clubEl = document.getElementById("gClub");
-  const courseEl = document.getElementById("gCourse");
+  const courseFrontEl = document.getElementById("gCourseFront");
+  const courseBackEl = document.getElementById("gCourseBack");
   if (clubEl) setupGroup.club = clubEl.value;
-  if (courseEl) setupGroup.course = courseEl.value;
+  if (courseFrontEl) setupGroup.courseFront = courseFrontEl.value;
+  if (courseBackEl) setupGroup.courseBack = courseBackEl.value;
   setupGroup.players.forEach((p, i) => {
     const nameEl = document.getElementById(`gName${i}`);
     const cartEl = document.getElementById(`gCart${i}`);
@@ -1272,9 +1287,10 @@ function renderGroupSetup() {
       <input type="text" id="gTitle" placeholder="예) 5월 정기전" value="${esc(setupGroup.title)}" />
 
       <label>골프장 (선택)</label>
-      <div class="row2">
-        <input type="text" id="gClub" placeholder="예) OO CC" value="${esc(setupGroup.club)}" />
-        <input type="text" id="gCourse" placeholder="코스(예: 동코스)" value="${esc(setupGroup.course)}" />
+      <input type="text" id="gClub" placeholder="예) OO CC" value="${esc(setupGroup.club)}" />
+      <div class="row2" style="margin-top:10px;">
+        <input type="text" id="gCourseFront" placeholder="전반 코스 (예: 동코스)" value="${esc(setupGroup.courseFront)}" />
+        <input type="text" id="gCourseBack" placeholder="후반 코스 (예: 서코스)" value="${esc(setupGroup.courseBack)}" />
       </div>
 
       <label>참가자 (${players.length}명)</label>
@@ -1382,7 +1398,8 @@ function renderGroupSetup() {
     state = newGroupState({
       title: setupGroup.title.trim() || "단체전",
       club: setupGroup.club.trim(),
-      course: setupGroup.course.trim(),
+      courseFront: setupGroup.courseFront.trim(),
+      courseBack: setupGroup.courseBack.trim(),
       players: list,
       usePeoria: setupGroup.usePeoria,
       excludeGross: setupGroup.excludeGross,
