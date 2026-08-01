@@ -333,7 +333,8 @@ const PLAYER_KEYS = ["a1", "a2", "b1", "b2"];
 const BONUS_MULTIPLIER = 2;
 
 // mode: "skins" | "peoria" | "both" — 신페리오가 포함되면 18홀 고정(페리오 홀 규칙상 필수).
-function newState(mode, names, totalHoles, skinsStake, peoriaStake) {
+// club/course는 둘 다 선택 입력(골프장이 코스를 여러 개 운영하는 경우가 많아 따로 받는다) — 기본값 빈 문자열.
+function newState(mode, names, totalHoles, skinsStake, peoriaStake, club = "", course = "") {
   const needsSkins = mode !== "peoria";
   const needsPeoria = mode !== "skins";
   const bonusSet = needsSkins ? new Set(pickBonusHoles(totalHoles)) : new Set();
@@ -344,6 +345,8 @@ function newState(mode, names, totalHoles, skinsStake, peoriaStake) {
     totalHoles,
     skinsStake,
     peoriaStake,
+    club,
+    course,
     peoriaHoles: needsPeoria ? pickPeoriaHoles() : [],
     holes: Array.from({ length: totalHoles }, (_, i) => ({
       par: null, a1: null, a2: null, b1: null, b2: null,
@@ -438,6 +441,8 @@ function newGroupState(opts) {
     mode: "group",
     startedAt: Date.now(),
     title: opts.title,
+    club: opts.club || "",
+    course: opts.course || "",
     usePeoria: opts.usePeoria,
     excludeGross: opts.excludeGross,
     players: opts.players.map((p) => ({ id: uid(), name: p.name, cart: p.cart })),
@@ -683,6 +688,8 @@ let groupTab = 0;       // 0 = 전체, 그 외 = 카트 번호
 let viewing = null;     // 보관함에서 열어본 지난 라운드(읽기 전용)
 let setupGroup = {
   title: "",
+  club: "",
+  course: "",
   usePeoria: true,
   excludeGross: false,
   players: Array.from({ length: 8 }, (_, i) => ({ name: "", cart: Math.floor(i / 4) + 1 })),
@@ -742,6 +749,12 @@ function renderSetup() {
         <button class="mode-btn" id="modePeoria">신페리오만<span class="sub">4인 개인전</span></button>
       </div>
       <button class="mode-btn mode-wide" id="modeGroup">단체전 스코어카드<span class="sub">8명 이상 · 롱기/니어/시상</span></button>
+
+      <label>골프장 (선택)</label>
+      <div class="row2">
+        <input type="text" id="club" placeholder="예) OO CC" value="" />
+        <input type="text" id="course" placeholder="코스(예: 동코스)" value="" />
+      </div>
 
       <label>선수 이름${needsSkins ? " (A팀 / B팀)" : ""}</label>
       <div class="row2">
@@ -810,7 +823,9 @@ function renderSetup() {
     const peoriaStakeEl = document.getElementById("peoriaStake");
     const skinsStake = needsSkins ? Math.max(1000, parseInt(skinsStakeEl.value, 10) || 10000) : 0;
     const peoriaStake = needsPeoria ? Math.max(10000, parseInt(peoriaStakeEl.value, 10) || 10000) : 0;
-    state = newState(setupMode, names, totalHoles, skinsStake, peoriaStake);
+    const club = document.getElementById("club").value.trim();
+    const course = document.getElementById("course").value.trim();
+    state = newState(setupMode, names, totalHoles, skinsStake, peoriaStake, club, course);
     saveState(state);
     editingIdx = null;
     pendingPar = null;
@@ -824,6 +839,11 @@ function paintModeButtons() {
     const el = document.getElementById(id);
     if (el) el.classList.toggle("active", setupMode === mode);
   }
+}
+
+// 골프장/코스 표시용 — 둘 다 선택 입력이라 있는 것만 이어 붙인다.
+function venueLabel(st) {
+  return [st.club, st.course].filter((v) => v && v.trim()).join(" · ");
 }
 
 // ---- 보관함 목록(설정 화면 하단) ----
@@ -856,11 +876,12 @@ function archiveHtml() {
         const title = isGroup(st)
           ? (st.title || "단체전")
           : `${st.names.a1}·${st.names.a2} vs ${st.names.b1}·${st.names.b2}`;
+        const venue = venueLabel(st);
         return `
           <div class="round-item" data-id="${r.id}">
             <div style="min-width:0;">
               <div class="t">${esc(title)}</div>
-              <div class="s">${dateLabel(st.startedAt || r.savedAt)} · ${esc(roundSummaryLine(st))}</div>
+              <div class="s">${venue ? `${esc(venue)} · ` : ""}${dateLabel(st.startedAt || r.savedAt)} · ${esc(roundSummaryLine(st))}</div>
             </div>
             <button class="del" data-del="${r.id}">✕</button>
           </div>
@@ -898,6 +919,7 @@ function renderPlay() {
       <h1 style="margin:0;">${title}</h1>
       <button class="btn-ghost" id="resetBtn">새 라운드</button>
     </div>
+    ${venueLabel(state) ? `<div class="subtitle" style="margin-bottom:6px;">⛳ ${esc(venueLabel(state))}</div>` : ""}
   `;
 
   if (needsSkins) {
@@ -1090,6 +1112,7 @@ function renderFinal(ro) {
       <h1 style="margin:0;">${title}</h1>
       <button class="btn-ghost" id="${ro ? "closeBtn" : "resetBtn"}">${ro ? "닫기" : "새 라운드"}</button>
     </div>
+    ${venueLabel(state) ? `<div class="subtitle" style="margin-bottom:6px;">⛳ ${esc(venueLabel(state))}</div>` : ""}
   `;
 
   if (needsSkins) {
@@ -1192,7 +1215,8 @@ function renderFinal(ro) {
 }
 
 function classicSummaryText(st) {
-  const L = [`[${MODE_INFO[st.mode].title}] ${dateLabel(st.startedAt || Date.now())}`, ""];
+  const venue = venueLabel(st);
+  const L = [`[${MODE_INFO[st.mode].title}] ${dateLabel(st.startedAt || Date.now())}${venue ? ` · ${venue}` : ""}`, ""];
   if (st.mode !== "peoria") {
     const s = computeSkins(st);
     const net = s.totalA - s.totalB;
@@ -1213,6 +1237,10 @@ function classicSummaryText(st) {
 function syncGroupInputs() {
   const titleEl = document.getElementById("gTitle");
   if (titleEl) setupGroup.title = titleEl.value;
+  const clubEl = document.getElementById("gClub");
+  const courseEl = document.getElementById("gCourse");
+  if (clubEl) setupGroup.club = clubEl.value;
+  if (courseEl) setupGroup.course = courseEl.value;
   setupGroup.players.forEach((p, i) => {
     const nameEl = document.getElementById(`gName${i}`);
     const cartEl = document.getElementById(`gCart${i}`);
@@ -1241,7 +1269,13 @@ function renderGroupSetup() {
       <button class="mode-btn mode-wide" id="modeGroup">단체전 스코어카드<span class="sub">8명 이상 · 롱기/니어/시상</span></button>
 
       <label>모임 이름</label>
-      <input type="text" id="gTitle" placeholder="예) 5월 정기전 · OO CC" value="${esc(setupGroup.title)}" />
+      <input type="text" id="gTitle" placeholder="예) 5월 정기전" value="${esc(setupGroup.title)}" />
+
+      <label>골프장 (선택)</label>
+      <div class="row2">
+        <input type="text" id="gClub" placeholder="예) OO CC" value="${esc(setupGroup.club)}" />
+        <input type="text" id="gCourse" placeholder="코스(예: 동코스)" value="${esc(setupGroup.course)}" />
+      </div>
 
       <label>참가자 (${players.length}명)</label>
       ${players.map((p, i) => `
@@ -1347,6 +1381,8 @@ function renderGroupSetup() {
     if (list.length < 2) { alert("참가자를 2명 이상 넣어주세요."); return; }
     state = newGroupState({
       title: setupGroup.title.trim() || "단체전",
+      club: setupGroup.club.trim(),
+      course: setupGroup.course.trim(),
       players: list,
       usePeoria: setupGroup.usePeoria,
       excludeGross: setupGroup.excludeGross,
@@ -1388,7 +1424,7 @@ function renderGroupPlay() {
       <h1 style="margin:0; font-size:18px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(state.title)}</h1>
       <button class="btn-ghost" id="resetBtn" style="flex-shrink:0;">새 라운드</button>
     </div>
-    <div class="progress">${state.players.length}명 · ${done}/${state.totalHoles}홀 완료${
+    <div class="progress">${venueLabel(state) ? `⛳ ${esc(venueLabel(state))} · ` : ""}${state.players.length}명 · ${done}/${state.totalHoles}홀 완료${
       state.usePeoria ? " · 페리오 홀은 종료 후 공개" : ""
     }</div>
   `;
@@ -1614,7 +1650,7 @@ function renderGroupFinal(ro) {
       <h1 style="margin:0; font-size:18px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(state.title)}</h1>
       <button class="btn-ghost" id="${ro ? "closeBtn" : "resetBtn"}" style="flex-shrink:0;">${ro ? "닫기" : "새 라운드"}</button>
     </div>
-    <div class="progress">${dateLabel(state.startedAt)} · ${state.players.length}명 · 코스 파 ${g.coursePar}</div>
+    <div class="progress">${venueLabel(state) ? `⛳ ${esc(venueLabel(state))} · ` : ""}${dateLabel(state.startedAt)} · ${state.players.length}명 · 코스 파 ${g.coursePar}</div>
   `;
 
   html += `<label>시상</label><div class="card" style="padding:0;">`;
@@ -1724,8 +1760,9 @@ function renderGroupFinal(ro) {
 }
 
 function groupSummaryText(st, g) {
+  const venue = venueLabel(st);
   const L = [];
-  L.push(`[${st.title}] ${dateLabel(st.startedAt)}`);
+  L.push(`[${st.title}] ${dateLabel(st.startedAt)}${venue ? ` · ${venue}` : ""}`);
   L.push(`${st.players.length}명 · 코스 파 ${g.coursePar}`);
   L.push("");
   if (g.peoriaWinner) L.push(`🏆 우승(신페리오) ${g.peoriaWinner.name} — 넷 ${g.peoriaWinner.net}타`);
