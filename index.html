@@ -182,6 +182,113 @@
 
   .peoria-list { font-size: 12.5px; color: var(--creamDim); line-height: 1.8; }
   .section-gap { margin-top: 22px; }
+
+  /* ---- 단체전 ---- */
+  .mode-wide { width: 100%; margin-top: 8px; }
+
+  .tab-row { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; }
+  .tab {
+    flex: 1; min-width: 64px; padding: 9px 0; background: transparent; color: var(--creamDim);
+    border: 1px solid var(--line); border-radius: 4px; font-weight: 700; font-size: 12.5px;
+  }
+  .tab.active { background: var(--panelLight); color: var(--cream); border-color: var(--brass); }
+
+  .grow {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 0; border-top: 1px solid var(--line);
+  }
+  .grow:first-of-type { border-top: none; }
+  .grow .gname { flex: 1; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .grow .gname span.nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cart-pill {
+    font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 3px;
+    border: 1px solid var(--line); color: var(--creamDim); flex-shrink: 0;
+  }
+  .stepper { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .stepper button {
+    width: 34px; height: 34px; background: var(--panelLight); color: var(--cream);
+    border: 1px solid var(--line); border-radius: 4px; font-size: 18px; font-weight: 800; line-height: 1;
+  }
+  .stepper .val { width: 46px; text-align: center; }
+  .stepper .val .num { font-size: 18px; font-weight: 900; display: block; line-height: 1.1; }
+  .stepper .val .rel { font-size: 10px; color: var(--creamDim); }
+  .stepper .val .rel.over { color: var(--red); }
+  .stepper .val .rel.under { color: var(--ok); }
+  .stepper .oy {
+    width: auto; padding: 0 8px; height: 34px; font-size: 11px; font-weight: 700; color: var(--brass);
+    background: transparent;
+  }
+
+  .special-box {
+    background: var(--panelLight); border: 1px solid var(--brass); border-radius: 4px;
+    padding: 12px; margin: 4px 0 14px;
+  }
+  .special-box .lab { font-size: 12px; font-weight: 800; color: var(--brass); margin-bottom: 8px; }
+  .name-chip {
+    padding: 7px 11px; background: transparent; color: var(--creamDim);
+    border: 1px solid var(--line); border-radius: 14px; font-size: 12.5px; font-weight: 700;
+  }
+  .name-chip.on { background: var(--brass); color: var(--panel); border-color: var(--brass); }
+
+  .award {
+    display: flex; align-items: center; gap: 12px; padding: 13px 14px;
+    border-top: 1px solid var(--line);
+  }
+  .award:first-child { border-top: none; }
+  .award .ico { font-size: 22px; width: 26px; text-align: center; }
+  .award .body { flex: 1; min-width: 0; }
+  .award .cat { font-size: 11px; font-weight: 800; color: var(--brass); letter-spacing: 0.04em; }
+  .award .who { font-size: 16px; font-weight: 900; margin-top: 1px; }
+  .award .det { font-size: 11.5px; color: var(--creamDim); margin-top: 2px; line-height: 1.5; }
+
+  .round-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 12px 14px; border-top: 1px solid var(--line); cursor: pointer;
+  }
+  .round-item:first-child { border-top: none; }
+  .round-item .t { font-size: 13.5px; font-weight: 700; }
+  .round-item .s { font-size: 11.5px; color: var(--creamDim); margin-top: 3px; }
+  .round-item .del { color: var(--creamDim); font-size: 16px; background: none; border: none; padding: 4px 6px; }
+
+  .pl-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .pl-row .idx { width: 18px; font-size: 12px; color: var(--creamDim); flex-shrink: 0; }
+  .pl-row input { flex: 1; min-width: 0; }
+  .pl-row select {
+    width: 74px; padding: 11px 6px; background: var(--bg); color: var(--cream);
+    border: 1px solid var(--line); border-radius: 4px; font-family: inherit; font-size: 13px;
+  }
+  .pl-row .rm { background: none; border: none; color: var(--creamDim); font-size: 18px; padding: 4px 2px; }
+
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 11px 0; border-top: 1px solid var(--line);
+  }
+  .toggle-row .tl { font-size: 13.5px; font-weight: 600; }
+  .toggle-row .td { font-size: 11.5px; color: var(--creamDim); margin-top: 3px; line-height: 1.45; }
+  .sw {
+    width: 46px; height: 26px; border-radius: 13px; border: 1px solid var(--line);
+    background: var(--bg); position: relative; flex-shrink: 0;
+  }
+  .sw::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+    border-radius: 50%; background: var(--creamDim); transition: all .15s;
+  }
+  .sw.on { background: var(--brass); border-color: var(--brass); }
+  .sw.on::after { left: 22px; background: var(--panel); }
+
+  .warn-note {
+    font-size: 11.5px; color: var(--red); margin-top: 8px; line-height: 1.5;
+  }
+  .btn-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .btn-secondary {
+    padding: 12px 0; background: transparent; color: var(--brass);
+    border: 1px solid var(--brass); border-radius: 4px; font-weight: 800; font-size: 13.5px;
+  }
+  .toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
+    background: var(--cream); color: var(--bg); padding: 10px 18px; border-radius: 20px;
+    font-size: 13px; font-weight: 800; z-index: 99; box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  }
 </style>
 </head>
 <body>
@@ -189,8 +296,11 @@
 
 <script>
 const STORE_KEY = "golfScoring:state";
+const ROUNDS_KEY = "golfScoring:rounds";   // 종료된 라운드 보관함
+const ROSTER_KEY = "golfScoring:roster";   // 자주 오는 참가자 이름
 const PLAYER_KEYS = ["a1", "a2", "b1", "b2"];
 const BONUS_MULTIPLIER = 2;
+const MAX_ARCHIVE = 60;
 
 function loadState() {
   try {
@@ -199,10 +309,92 @@ function loadState() {
   } catch { return null; }
 }
 function saveState(state) {
-  localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  // 사파리 사생활 보호 모드 등에서 저장이 막히면 조용히 날아가는 대신 알려준다.
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  } catch (e) {
+    alert("기록 저장에 실패했습니다. 브라우저의 사생활 보호 모드를 끄고 다시 시도해주세요.");
+  }
 }
 function fmt(n) {
   return n.toLocaleString("ko-KR");
+}
+
+// ---- 보관함: 새 라운드를 시작해도 지난 라운드가 남도록 별도 키에 쌓는다 ----
+function loadRounds() {
+  try {
+    const raw = localStorage.getItem(ROUNDS_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+function saveRounds(rounds) {
+  localStorage.setItem(ROUNDS_KEY, JSON.stringify(rounds.slice(0, MAX_ARCHIVE)));
+}
+// 같은 라운드를 두 번 저장하지 않도록 startedAt을 식별자로 쓴다.
+function archiveRound(st) {
+  if (!st) return false;
+  const rounds = loadRounds();
+  // data-id는 항상 문자열로 돌아오므로 식별자도 문자열로 통일한다.
+  const started = st.startedAt || Date.now();
+  const id = String(started);
+  const snapshot = { ...st, startedAt: started };
+  const existing = rounds.findIndex((r) => r.id === id);
+  const entry = { id, savedAt: Date.now(), state: snapshot };
+  if (existing >= 0) rounds[existing] = entry;
+  else rounds.unshift(entry);
+  saveRounds(rounds);
+  return true;
+}
+function deleteRound(id) {
+  saveRounds(loadRounds().filter((r) => r.id !== id));
+}
+
+function loadRoster() {
+  try {
+    const raw = localStorage.getItem(ROSTER_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+// 최근에 같이 친 사람이 앞으로 오도록 정렬해두면 다음 모임에서 탭 몇 번으로 명단이 완성된다.
+function rememberNames(names) {
+  const clean = names.map((n) => String(n).trim()).filter(Boolean);
+  const merged = [...clean, ...loadRoster().filter((n) => !clean.includes(n))];
+  localStorage.setItem(ROSTER_KEY, JSON.stringify(merged.slice(0, 40)));
+}
+
+function dateLabel(ts) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+}
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function toast(msg) {
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1800);
+}
+function copyText(text) {
+  const done = () => toast("복사했습니다");
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done));
+  } else {
+    fallbackCopy(text, done);
+  }
+}
+function fallbackCopy(text, done) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand("copy"); done(); } catch { alert(text); }
+  ta.remove();
 }
 
 // ---- 스킨스: 보너스 홀 뽑기 (전반 중 1홀, 후반 있으면 후반 중 1홀) ----
@@ -239,6 +431,7 @@ function newState(mode, names, totalHoles, skinsStake, peoriaStake) {
   const bonusSet = needsSkins ? new Set(pickBonusHoles(totalHoles)) : new Set();
   return {
     mode,
+    startedAt: Date.now(),
     names,          // {a1,a2,b1,b2}
     totalHoles,
     skinsStake,
@@ -305,6 +498,116 @@ function computePeoria(state) {
   return { coursePar, results, pairwise };
 }
 
+// ===================== 단체전 =====================
+// 인원 가변(보통 2카트 8명, 그 이상도 가능). 팀 정산이 아니라 시상이 목적이라
+// 타수 1등 / 신페리오 1등 / 파3 니어 / 파5 롱기를 뽑는다.
+function uid() {
+  return Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-3);
+}
+
+function newGroupState(opts) {
+  const totalHoles = 18; // 신페리오·카운트백 모두 18홀 기준
+  return {
+    mode: "group",
+    startedAt: Date.now(),
+    title: opts.title,
+    usePeoria: opts.usePeoria,
+    excludeGross: opts.excludeGross,
+    players: opts.players.map((p) => ({ id: uid(), name: p.name, cart: p.cart })),
+    totalHoles,
+    peoriaHoles: opts.usePeoria ? pickPeoriaHoles() : [],
+    holes: Array.from({ length: totalHoles }, () => ({
+      par: null, scores: {}, longest: null, nearest: null,
+    })),
+  };
+}
+
+function holeFilledGroup(state, h) {
+  return h.par != null && state.players.every((p) => typeof h.scores[p.id] === "number");
+}
+function countDoneGroup(state) {
+  let n = 0;
+  for (const h of state.holes) {
+    if (!holeFilledGroup(state, h)) break;
+    n++;
+  }
+  return n;
+}
+
+// 동타 처리: 후반 9홀 → 마지막 6홀 → 3홀 → 마지막 홀 순으로 적은 쪽이 우선(카운트백).
+function countback(a, b) {
+  for (const n of [9, 6, 3, 1]) {
+    if (a.length < n || b.length < n) continue;
+    const sa = a.slice(-n).reduce((s, v) => s + v, 0);
+    const sb = b.slice(-n).reduce((s, v) => s + v, 0);
+    if (sa !== sb) return sa - sb;
+  }
+  return 0;
+}
+
+function computeGroup(state) {
+  const done = countDoneGroup(state);
+  const played = state.holes.slice(0, done);
+  const complete = done === state.totalHoles;
+  const coursePar = played.reduce((s, h) => s + h.par, 0);
+  const peoriaReady = state.usePeoria && complete;
+
+  const rows = state.players.map((p) => {
+    const strokes = played.map((h) => h.scores[p.id]);
+    const total = strokes.reduce((s, v) => s + v, 0);
+    const row = {
+      id: p.id, name: p.name, cart: p.cart, strokes, total,
+      vsPar: total - coursePar, handicap: null, net: null, peoriaSum: null,
+    };
+    if (peoriaReady) {
+      const peoriaSum = state.peoriaHoles.reduce((s, i) => s + state.holes[i].scores[p.id], 0);
+      const estimated = peoriaSum * 1.5;
+      const handicap = Math.round((estimated - coursePar) * 0.8);
+      row.peoriaSum = peoriaSum;
+      row.estimated = estimated;
+      row.handicap = handicap;
+      row.net = total - handicap;
+    }
+    return row;
+  });
+
+  // 타수(그로스) 순위 — 총타수 → 카운트백
+  const gross = [...rows].sort((x, y) => (x.total - y.total) || countback(x.strokes, y.strokes));
+  // 신페리오 순위 — 넷스코어 → 핸디캡 적은 쪽(=실력자) 우선 → 카운트백
+  const peoria = peoriaReady
+    ? [...rows].sort((x, y) => (x.net - y.net) || (x.handicap - y.handicap) || countback(x.strokes, y.strokes))
+    : [];
+
+  const grossWinner = done > 0 ? gross[0] : null;
+  // 중복 수상 제외 옵션이 켜져 있으면 타수 1등은 신페리오 시상 대상에서 뺀다.
+  let peoriaWinner = null;
+  if (peoriaReady) {
+    peoriaWinner = state.excludeGross && grossWinner
+      ? peoria.find((r) => r.id !== grossWinner.id) || null
+      : peoria[0];
+  }
+
+  const nameOf = (id) => (state.players.find((p) => p.id === id) || {}).name || "";
+  const nearest = [];
+  const longest = [];
+  for (let i = 0; i < done; i++) {
+    const h = state.holes[i];
+    if (h.par === 3 && h.nearest) nearest.push({ hole: i + 1, id: h.nearest, name: nameOf(h.nearest) });
+    if (h.par === 5 && h.longest) longest.push({ hole: i + 1, id: h.longest, name: nameOf(h.longest) });
+  }
+  const tally = (list) => {
+    const map = new Map();
+    for (const x of list) map.set(x.name, (map.get(x.name) || 0) + 1);
+    return [...map.entries()].sort((a, b) => b[1] - a[1]);
+  };
+
+  return {
+    done, complete, coursePar, peoriaReady, rows, gross, peoria,
+    grossWinner, peoriaWinner, nearest, longest,
+    nearestTally: tally(nearest), longestTally: tally(longest),
+  };
+}
+
 // 파 대비 스코어 용어 — 칩 버튼과 홀별 기록 표시에 공용으로 쓴다.
 // "트리플+"처럼 "이상"을 뜻하는 라벨을 쓰면 눌렀을 때 실제로는 +3만 들어가는 것과 헷갈려서
 // (파4에서 4오버를 의도하고 이 칩을 눌렀지만 실제로는 3오버=7타만 저장된 사례) 델타를 하나씩 명확히 늘어놓는다.
@@ -352,15 +655,45 @@ let pendingPar = null; // 현재 카드에서 고른 파 — { idx, par }
 let setupMode = "both"; // 설정 화면에서 고르는 중인 모드(시작 전)
 let setupHoles = 18;
 
+// 단체전 전용
+let groupDraft = null;  // 입력 중인 홀 — { idx, par, scores, nearest, longest }
+let groupTab = 0;       // 0 = 전체, 그 외 = 카트 번호
+let viewing = null;     // 보관함에서 열어본 지난 라운드(읽기 전용)
+let setupGroup = {
+  title: "",
+  usePeoria: true,
+  excludeGross: false,
+  players: Array.from({ length: 8 }, (_, i) => ({ name: "", cart: Math.floor(i / 4) + 1 })),
+};
+
 const root = document.getElementById("app");
 
+function isGroup(st) { return st && st.mode === "group"; }
+function doneCount(st) { return isGroup(st) ? countDoneGroup(st) : countDone(st); }
+
 function render() {
-  if (!state) {
-    renderSetup();
-  } else if (countDone(state) >= state.totalHoles) {
-    renderFinal();
+  // 보관함에서 지난 라운드를 열어본 경우 — 원본을 건드리지 않고 읽기 전용으로만 보여준다.
+  if (viewing) {
+    const live = state;
+    state = viewing;
+    if (isGroup(state)) renderGroupFinal(true); else renderFinal(true);
+    state = live;
+    return;
+  }
+  if (!state) { renderSetup(); return; }
+
+  const total = state.totalHoles;
+  const finished = doneCount(state) >= total;
+
+  // 라운드가 끝나면 즉시 보관함에 넣는다. "새 라운드"를 눌러도 기록이 남도록.
+  if (finished) archiveRound(state);
+
+  if (isGroup(state)) {
+    if (finished && editingIdx == null) renderGroupFinal(false);
+    else renderGroupPlay();
   } else {
-    renderPlay();
+    if (finished && editingIdx == null) renderFinal(false);
+    else renderPlay();
   }
 }
 
@@ -371,6 +704,8 @@ const MODE_INFO = {
 };
 
 function renderSetup() {
+  if (setupMode === "group") { renderGroupSetup(); return; }
+
   const needsSkins = setupMode !== "peoria";
   const needsPeoria = setupMode !== "skins";
 
@@ -384,6 +719,7 @@ function renderSetup() {
         <button class="mode-btn" id="modeBoth">합쳐서<span class="sub">한 번 입력</span></button>
         <button class="mode-btn" id="modePeoria">신페리오만<span class="sub">4인 개인전</span></button>
       </div>
+      <button class="mode-btn mode-wide" id="modeGroup">단체전 스코어카드<span class="sub">8명 이상 · 롱기/니어/시상</span></button>
 
       <label>선수 이름${needsSkins ? " (A팀 / B팀)" : ""}</label>
       <div class="row2">
@@ -415,13 +751,16 @@ function renderSetup() {
 
       <button class="btn-primary" id="startBtn">시작</button>
     </div>
+    ${archiveHtml()}
   `;
 
   paintModeButtons();
+  bindArchive();
 
   document.getElementById("modeSkins").onclick = () => { setupMode = "skins"; renderSetup(); };
   document.getElementById("modeBoth").onclick = () => { setupMode = "both"; renderSetup(); };
   document.getElementById("modePeoria").onclick = () => { setupMode = "peoria"; renderSetup(); };
+  document.getElementById("modeGroup").onclick = () => { setupMode = "group"; renderSetup(); };
 
   if (needsSkins) {
     const h9 = document.getElementById("holes9");
@@ -458,9 +797,71 @@ function renderSetup() {
 }
 
 function paintModeButtons() {
-  document.getElementById("modeSkins").classList.toggle("active", setupMode === "skins");
-  document.getElementById("modeBoth").classList.toggle("active", setupMode === "both");
-  document.getElementById("modePeoria").classList.toggle("active", setupMode === "peoria");
+  const map = { modeSkins: "skins", modeBoth: "both", modePeoria: "peoria", modeGroup: "group" };
+  for (const [id, mode] of Object.entries(map)) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle("active", setupMode === mode);
+  }
+}
+
+// ---- 보관함 목록(설정 화면 하단) ----
+function roundSummaryLine(st) {
+  if (isGroup(st)) {
+    const g = computeGroup(st);
+    const win = g.peoriaWinner || g.grossWinner;
+    return `${st.players.length}명 · ${win ? `우승 ${win.name}` : "기록 없음"}`;
+  }
+  const parts = [];
+  if (st.mode !== "peoria") {
+    const s = computeSkins(st);
+    const net = s.totalA - s.totalB;
+    parts.push(net === 0 ? "스킨스 무승부" : `스킨스 ${net > 0 ? "A팀" : "B팀"} +${fmt(Math.abs(net))}원`);
+  }
+  if (st.mode !== "skins" && countDone(st) >= st.totalHoles) {
+    parts.push(`신페리오 ${computePeoria(st).results[0].name}`);
+  }
+  return parts.join(" · ") || "기록 없음";
+}
+
+function archiveHtml() {
+  const rounds = loadRounds();
+  if (rounds.length === 0) return "";
+  return `
+    <label class="section-gap">지난 라운드 (${rounds.length})</label>
+    <div class="card" style="padding:0;">
+      ${rounds.slice(0, 12).map((r) => {
+        const st = r.state;
+        const title = isGroup(st)
+          ? (st.title || "단체전")
+          : `${st.names.a1}·${st.names.a2} vs ${st.names.b1}·${st.names.b2}`;
+        return `
+          <div class="round-item" data-id="${r.id}">
+            <div style="min-width:0;">
+              <div class="t">${esc(title)}</div>
+              <div class="s">${dateLabel(st.startedAt || r.savedAt)} · ${esc(roundSummaryLine(st))}</div>
+            </div>
+            <button class="del" data-del="${r.id}">✕</button>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function bindArchive() {
+  document.querySelectorAll(".round-item").forEach((el) => {
+    el.onclick = (e) => {
+      if (e.target.dataset.del) return;
+      const found = loadRounds().find((r) => r.id === el.dataset.id);
+      if (found) { viewing = found.state; window.scrollTo({ top: 0 }); render(); }
+    };
+  });
+  document.querySelectorAll("[data-del]").forEach((el) => {
+    el.onclick = (e) => {
+      e.stopPropagation();
+      if (confirm("이 라운드 기록을 삭제할까요?")) { deleteRound(el.dataset.del); render(); }
+    };
+  });
 }
 
 function renderPlay() {
@@ -657,7 +1058,7 @@ function renderPlay() {
   bindResetButton();
 }
 
-function renderFinal() {
+function renderFinal(ro) {
   const needsSkins = state.mode !== "peoria";
   const needsPeoria = state.mode !== "skins";
   const title = MODE_INFO[state.mode].title;
@@ -665,7 +1066,7 @@ function renderFinal() {
   let html = `
     <div style="display:flex; justify-content:space-between; align-items:center; margin:16px 0 4px;">
       <h1 style="margin:0;">${title}</h1>
-      <button class="btn-ghost" id="resetBtn">새 라운드</button>
+      <button class="btn-ghost" id="${ro ? "closeBtn" : "resetBtn"}">${ro ? "닫기" : "새 라운드"}</button>
     </div>
   `;
 
@@ -730,13 +1131,15 @@ function renderFinal() {
     `;
   }
 
+  html += `<button class="btn-secondary" id="copyBtn" style="width:100%;">결과 복사 (카톡 공유용)</button>`;
+
   html += `<label class="section-gap">홀별 기록</label>`;
   html += `<div class="card" style="padding:0;">`;
   for (let i = state.totalHoles - 1; i >= 0; i--) {
     const h = state.holes[i];
     const parts = PLAYER_KEYS.map((k) => `${state.names[k]} ${h[k]}(${holeLabel(h[k], h.par)})`).join(" · ");
     html += `
-      <div class="hole-row" style="cursor:default;">
+      <div class="hole-row" data-idx="${i}">
         <div class="left">
           <span class="hn">${i + 1}</span>
           <span>파${h.par} · ${parts}</span>
@@ -748,18 +1151,592 @@ function renderFinal() {
 
   root.innerHTML = html;
 
+  document.getElementById("copyBtn").onclick = () => copyText(classicSummaryText(state));
+
+  if (ro) {
+    document.getElementById("closeBtn").onclick = () => { viewing = null; render(); };
+  } else {
+    // 18홀을 다 채운 뒤에도 마지막 홀 오타를 고칠 수 있어야 한다.
+    document.querySelectorAll(".hole-row").forEach((el) => {
+      el.onclick = () => {
+        editingIdx = parseInt(el.dataset.idx, 10);
+        pendingPar = null;
+        render();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+    });
+    bindResetButton();
+  }
+}
+
+function classicSummaryText(st) {
+  const L = [`[${MODE_INFO[st.mode].title}] ${dateLabel(st.startedAt || Date.now())}`, ""];
+  if (st.mode !== "peoria") {
+    const s = computeSkins(st);
+    const net = s.totalA - s.totalB;
+    L.push(`A팀 ${st.names.a1}·${st.names.a2} ${fmt(s.totalA)}원`);
+    L.push(`B팀 ${st.names.b1}·${st.names.b2} ${fmt(s.totalB)}원`);
+    L.push(net === 0 ? "→ 무승부" : `→ ${net > 0 ? "B팀 → A팀" : "A팀 → B팀"} ${fmt(Math.abs(net))}원 (1인당 ${fmt(Math.round(Math.abs(net) / 2))}원)`);
+    L.push("");
+  }
+  if (st.mode !== "skins" && countDone(st) >= st.totalHoles) {
+    const { results } = computePeoria(st);
+    L.push("— 신페리오 —");
+    results.forEach((r, i) => L.push(`${i + 1}. ${r.name}  ${r.total}타 / 핸디 ${r.handicap} / 넷 ${r.net} / ${r.settle > 0 ? "+" : ""}${fmt(r.settle)}원`));
+  }
+  return L.join("\n");
+}
+
+// ---- 단체전: 설정 ----
+function syncGroupInputs() {
+  const titleEl = document.getElementById("gTitle");
+  if (titleEl) setupGroup.title = titleEl.value;
+  setupGroup.players.forEach((p, i) => {
+    const nameEl = document.getElementById(`gName${i}`);
+    const cartEl = document.getElementById(`gCart${i}`);
+    if (nameEl) p.name = nameEl.value;
+    if (cartEl) p.cart = parseInt(cartEl.value, 10) || 1;
+  });
+}
+
+function renderGroupSetup() {
+  const players = setupGroup.players;
+  const maxCart = Math.max(1, ...players.map((p) => p.cart));
+  const cartChoices = Array.from({ length: maxCart + 1 }, (_, i) => i + 1);
+  const typed = players.map((p) => p.name.trim()).filter(Boolean);
+  const suggest = loadRoster().filter((n) => !typed.includes(n)).slice(0, 12);
+
+  root.innerHTML = `
+    <h1>골프 스코어 정산</h1>
+    <div class="subtitle">단체 라운드의 스코어카드를 한 곳에 모아 시상 결과까지 뽑습니다.</div>
+    <div class="card">
+      <label>모드</label>
+      <div class="row3">
+        <button class="mode-btn" id="modeSkins">스킨스만<span class="sub">2v2 팀전</span></button>
+        <button class="mode-btn" id="modeBoth">합쳐서<span class="sub">한 번 입력</span></button>
+        <button class="mode-btn" id="modePeoria">신페리오만<span class="sub">4인 개인전</span></button>
+      </div>
+      <button class="mode-btn mode-wide" id="modeGroup">단체전 스코어카드<span class="sub">8명 이상 · 롱기/니어/시상</span></button>
+
+      <label>모임 이름</label>
+      <input type="text" id="gTitle" placeholder="예) 5월 정기전 · OO CC" value="${esc(setupGroup.title)}" />
+
+      <label>참가자 (${players.length}명)</label>
+      ${players.map((p, i) => `
+        <div class="pl-row">
+          <span class="idx">${i + 1}</span>
+          <input type="text" id="gName${i}" placeholder="이름" value="${esc(p.name)}" />
+          <select id="gCart${i}">
+            ${cartChoices.map((c) => `<option value="${c}" ${c === p.cart ? "selected" : ""}>${c}조</option>`).join("")}
+          </select>
+          <button class="rm" data-rm="${i}" ${players.length <= 2 ? "disabled" : ""}>✕</button>
+        </div>
+      `).join("")}
+      <div class="btn-row2">
+        <button class="btn-secondary" id="addPlayer">+ 참가자 추가</button>
+        <button class="btn-secondary" id="addCart">+ 조 추가</button>
+      </div>
+
+      ${suggest.length ? `
+        <label>최근 참가자</label>
+        <div class="chip-row">
+          ${suggest.map((n) => `<button class="name-chip" data-add="${esc(n)}">${esc(n)}</button>`).join("")}
+        </div>
+      ` : ""}
+
+      <div class="toggle-row" style="margin-top:14px;">
+        <div>
+          <div class="tl">신페리오 시상</div>
+          <div class="td">18홀 종료 후 페리오 홀 12개로 핸디캡을 계산합니다</div>
+        </div>
+        <button class="sw ${setupGroup.usePeoria ? "on" : ""}" id="swPeoria"></button>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="tl">중복 수상 제외</div>
+          <div class="td">타수 1등은 신페리오 우승에서 제외하고 다음 순위에게 넘깁니다</div>
+        </div>
+        <button class="sw ${setupGroup.excludeGross ? "on" : ""}" id="swExclude"></button>
+      </div>
+
+      <button class="btn-primary" id="startGroupBtn">시작</button>
+    </div>
+    ${archiveHtml()}
+  `;
+
+  paintModeButtons();
+  bindArchive();
+
+  const go = (mode) => { syncGroupInputs(); setupMode = mode; renderSetup(); };
+  document.getElementById("modeSkins").onclick = () => go("skins");
+  document.getElementById("modeBoth").onclick = () => go("both");
+  document.getElementById("modePeoria").onclick = () => go("peoria");
+  document.getElementById("modeGroup").onclick = () => go("group");
+
+  document.getElementById("addPlayer").onclick = () => {
+    syncGroupInputs();
+    const last = setupGroup.players[setupGroup.players.length - 1];
+    setupGroup.players.push({ name: "", cart: last ? last.cart : 1 });
+    renderGroupSetup();
+  };
+  document.getElementById("addCart").onclick = () => {
+    syncGroupInputs();
+    const next = Math.max(1, ...setupGroup.players.map((p) => p.cart)) + 1;
+    setupGroup.players.push({ name: "", cart: next });
+    renderGroupSetup();
+  };
+  document.querySelectorAll("[data-rm]").forEach((el) => {
+    el.onclick = () => {
+      syncGroupInputs();
+      setupGroup.players.splice(parseInt(el.dataset.rm, 10), 1);
+      renderGroupSetup();
+    };
+  });
+  document.querySelectorAll("[data-add]").forEach((el) => {
+    el.onclick = () => {
+      syncGroupInputs();
+      const empty = setupGroup.players.find((p) => !p.name.trim());
+      if (empty) empty.name = el.dataset.add;
+      else {
+        const last = setupGroup.players[setupGroup.players.length - 1];
+        setupGroup.players.push({ name: el.dataset.add, cart: last ? last.cart : 1 });
+      }
+      renderGroupSetup();
+    };
+  });
+  document.getElementById("swPeoria").onclick = () => {
+    syncGroupInputs(); setupGroup.usePeoria = !setupGroup.usePeoria; renderGroupSetup();
+  };
+  document.getElementById("swExclude").onclick = () => {
+    syncGroupInputs(); setupGroup.excludeGross = !setupGroup.excludeGross; renderGroupSetup();
+  };
+
+  document.getElementById("startGroupBtn").onclick = () => {
+    syncGroupInputs();
+    // 이름이 겹치면 니어/롱기를 고를 때 누가 누군지 알 수 없으므로 뒤에 번호를 붙인다.
+    const seen = new Map();
+    const list = setupGroup.players.map((p, i) => {
+      let name = p.name.trim() || `선수${i + 1}`;
+      const n = (seen.get(name) || 0) + 1;
+      seen.set(name, n);
+      if (n > 1) name = `${name}(${n})`;
+      return { name, cart: p.cart };
+    });
+    if (list.length < 2) { alert("참가자를 2명 이상 넣어주세요."); return; }
+    state = newGroupState({
+      title: setupGroup.title.trim() || "단체전",
+      players: list,
+      usePeoria: setupGroup.usePeoria,
+      excludeGross: setupGroup.excludeGross,
+    });
+    rememberNames(list.map((p) => p.name));
+    saveState(state);
+    editingIdx = null;
+    groupDraft = null;
+    groupTab = 0;
+    render();
+  };
+}
+
+// ---- 단체전: 홀 입력 ----
+function renderGroupPlay() {
+  const g = computeGroup(state);
+  const done = g.done;
+  const editingPast = editingIdx != null;
+  const idx = editingPast ? editingIdx : Math.min(done, state.totalHoles - 1);
+  const hole = state.holes[idx];
+
+  if (!groupDraft || groupDraft.idx !== idx) {
+    const par = hole.par ?? defaultPar(state, idx);
+    groupDraft = {
+      idx, par,
+      scores: Object.fromEntries(state.players.map((p) => [p.id, hole.scores[p.id] ?? par])),
+      nearest: hole.nearest || null,
+      longest: hole.longest || null,
+      // 이미 저장된 홀을 다시 여는 경우엔 전원 입력된 것으로 본다(파를 바꿔도 값이 안 밀리게).
+      touched: new Set(hole.par != null ? state.players.map((p) => p.id) : []),
+    };
+  }
+
+  const carts = [...new Set(state.players.map((p) => p.cart))].sort((a, b) => a - b);
+  const shown = groupTab === 0 ? state.players : state.players.filter((p) => p.cart === groupTab);
+
+  let html = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin:16px 0 4px; gap:10px;">
+      <h1 style="margin:0; font-size:18px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(state.title)}</h1>
+      <button class="btn-ghost" id="resetBtn" style="flex-shrink:0;">새 라운드</button>
+    </div>
+    <div class="progress">${state.players.length}명 · ${done}/${state.totalHoles}홀 완료${
+      state.usePeoria ? " · 페리오 홀은 종료 후 공개" : ""
+    }</div>
+  `;
+
+  if (carts.length > 1) {
+    html += `<div class="tab-row">
+      <button class="tab ${groupTab === 0 ? "active" : ""}" data-tab="0">전체</button>
+      ${carts.map((c) => `<button class="tab ${groupTab === c ? "active" : ""}" data-tab="${c}">${c}조</button>`).join("")}
+    </div>`;
+  }
+
+  html += `
+    <div class="card">
+      <div class="hole-head">
+        <span class="n">${idx + 1}홀${editingPast ? " (수정)" : ""}</span>
+        <span class="pot-tag">${shown.length}명 표시 중</span>
+      </div>
+      <div class="par-row">
+        ${[3, 4, 5].map((p) => `<button class="par-btn ${p === groupDraft.par ? "active" : ""}" data-par="${p}">파${p}</button>`).join("")}
+      </div>
+      <div id="specialBox"></div>
+      ${shown.map((p) => `
+        <div class="grow">
+          <div class="gname">
+            ${carts.length > 1 ? `<span class="cart-pill">${p.cart}조</span>` : ""}
+            <span class="nm">${esc(p.name)}</span>
+          </div>
+          <div class="stepper">
+            <button data-step="-1" data-id="${p.id}">−</button>
+            <div class="val"><span class="num" id="gv_${p.id}"></span><span class="rel" id="gr_${p.id}"></span></div>
+            <button data-step="1" data-id="${p.id}">+</button>
+            <button class="oy" data-oy="${p.id}">양파</button>
+          </div>
+        </div>
+      `).join("")}
+      <button class="btn-primary" id="confirmGroupBtn">${editingPast ? "수정 저장" : "확정"}</button>
+      ${editingPast ? `<button class="btn-ghost" id="cancelEditBtn" style="width:100%; margin-top:8px;">취소</button>` : ""}
+      <div class="warn-note" id="untouchedNote"></div>
+    </div>
+  `;
+
+  if (done > 0) {
+    html += `<label class="section-gap">현재 타수 순위</label><div class="card" style="padding:0;">`;
+    html += g.gross.slice(0, 5).map((r, i) => `
+      <div class="settle-row">
+        <span>${i + 1}. ${esc(r.name)}</span>
+        <span class="amt ${r.vsPar <= 0 ? "pos" : ""}">${r.total}타 (${r.vsPar > 0 ? "+" : ""}${r.vsPar})</span>
+      </div>
+    `).join("");
+    html += `</div>`;
+  }
+
+  html += `<label class="section-gap">홀별 기록</label>`;
+  if (done === 0) {
+    html += `<div class="card"><div class="empty-note">아직 확정된 홀이 없습니다</div></div>`;
+  } else {
+    html += `<div class="card" style="padding:0;">`;
+    for (let i = done - 1; i >= 0; i--) html += groupHoleRow(state, i);
+    html += `</div>`;
+  }
+
+  root.innerHTML = html;
+  paintSpecial();
+  state.players.forEach((p) => paintGroupRow(p.id));
+  paintUntouchedNote();
+
+  document.querySelectorAll("[data-tab]").forEach((el) => {
+    el.onclick = () => { groupTab = parseInt(el.dataset.tab, 10); render(); };
+  });
+
+  document.querySelectorAll(".par-btn").forEach((el) => {
+    el.onclick = () => {
+      const newPar = parseInt(el.dataset.par, 10);
+      groupDraft.par = newPar;
+      // 아직 손대지 않은 사람은 파 기준값을 따라가게 한다.
+      state.players.forEach((p) => {
+        if (!groupDraft.touched.has(p.id)) groupDraft.scores[p.id] = newPar;
+      });
+      if (newPar !== 3) groupDraft.nearest = null;
+      if (newPar !== 5) groupDraft.longest = null;
+      document.querySelectorAll(".par-btn").forEach((b) => {
+        b.classList.toggle("active", parseInt(b.dataset.par, 10) === newPar);
+      });
+      state.players.forEach((p) => paintGroupRow(p.id));
+      paintSpecial();
+      paintUntouchedNote();
+    };
+  });
+
+  document.querySelectorAll("[data-step]").forEach((el) => {
+    el.onclick = () => {
+      const id = el.dataset.id;
+      const delta = parseInt(el.dataset.step, 10);
+      const next = Math.min(20, Math.max(1, groupDraft.scores[id] + delta));
+      groupDraft.scores[id] = next;
+      groupDraft.touched.add(id);
+      paintGroupRow(id);
+      paintUntouchedNote();
+    };
+  });
+
+  document.querySelectorAll("[data-oy]").forEach((el) => {
+    el.onclick = () => {
+      const id = el.dataset.oy;
+      groupDraft.scores[id] = ONYANG_STROKES;
+      groupDraft.touched.add(id);
+      paintGroupRow(id);
+      paintUntouchedNote();
+    };
+  });
+
+  document.getElementById("confirmGroupBtn").onclick = () => {
+    const missing = state.players.filter((p) => !groupDraft.touched.has(p.id));
+    if (missing.length > 0 && missing.length !== state.players.length) {
+      const names = missing.map((p) => p.name).join(", ");
+      if (!confirm(`${names} — 아직 안 건드린 사람이 있습니다. 파(${groupDraft.par}타)로 저장할까요?`)) return;
+    }
+    state.holes[groupDraft.idx] = {
+      par: groupDraft.par,
+      scores: { ...groupDraft.scores },
+      nearest: groupDraft.par === 3 ? groupDraft.nearest : null,
+      longest: groupDraft.par === 5 ? groupDraft.longest : null,
+    };
+    saveState(state);
+    editingIdx = null;
+    groupDraft = null;
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const cancelBtn = document.getElementById("cancelEditBtn");
+  if (cancelBtn) cancelBtn.onclick = () => { editingIdx = null; groupDraft = null; render(); };
+
+  document.querySelectorAll(".hole-row").forEach((el) => {
+    el.onclick = () => {
+      editingIdx = parseInt(el.dataset.idx, 10);
+      groupDraft = null;
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+  });
+
   bindResetButton();
+}
+
+function paintGroupRow(id) {
+  const numEl = document.getElementById(`gv_${id}`);
+  const relEl = document.getElementById(`gr_${id}`);
+  if (!numEl || !relEl) return; // 다른 조 탭이라 화면에 없는 경우
+  const v = groupDraft.scores[id];
+  const d = v - groupDraft.par;
+  numEl.textContent = v;
+  relEl.textContent = holeLabel(v, groupDraft.par);
+  relEl.className = "rel" + (d > 0 ? " over" : d < 0 ? " under" : "");
+}
+
+function paintUntouchedNote() {
+  const el = document.getElementById("untouchedNote");
+  if (!el) return;
+  const n = state.players.filter((p) => !groupDraft.touched.has(p.id)).length;
+  el.textContent = n > 0 && n < state.players.length
+    ? `아직 ${n}명은 파 기준값 그대로입니다`
+    : "";
+}
+
+// 파3이면 니어, 파5면 롱기를 그 자리에서 기록한다.
+function paintSpecial() {
+  const box = document.getElementById("specialBox");
+  if (!box) return;
+  const par = groupDraft.par;
+  if (par !== 3 && par !== 5) { box.innerHTML = ""; return; }
+  const isNear = par === 3;
+  const current = isNear ? groupDraft.nearest : groupDraft.longest;
+  box.innerHTML = `
+    <div class="special-box">
+      <div class="lab">${isNear ? "🎯 니어리스트 (파3)" : "💥 롱기스트 (파5)"}</div>
+      <div class="chip-row">
+        ${state.players.map((p) => `
+          <button class="name-chip ${current === p.id ? "on" : ""}" data-sp="${p.id}">${esc(p.name)}</button>
+        `).join("")}
+        <button class="name-chip ${!current ? "on" : ""}" data-sp="">없음</button>
+      </div>
+    </div>
+  `;
+  box.querySelectorAll("[data-sp]").forEach((el) => {
+    el.onclick = () => {
+      const val = el.dataset.sp || null;
+      if (isNear) groupDraft.nearest = val; else groupDraft.longest = val;
+      paintSpecial();
+    };
+  });
+}
+
+function groupHoleRow(st, i) {
+  const h = st.holes[i];
+  const nameOf = (id) => (st.players.find((p) => p.id === id) || {}).name || "";
+  const best = st.players.reduce((a, p) => (h.scores[p.id] < h.scores[a.id] ? p : a), st.players[0]);
+  const tags = [];
+  if (h.par === 3 && h.nearest) tags.push(`🎯 ${nameOf(h.nearest)}`);
+  if (h.par === 5 && h.longest) tags.push(`💥 ${nameOf(h.longest)}`);
+  const scores = st.players.map((p) => h.scores[p.id]);
+  const avg = (scores.reduce((s, v) => s + v, 0) / scores.length).toFixed(1);
+  return `
+    <div class="hole-row" data-idx="${i}">
+      <div class="left" style="min-width:0;">
+        <span class="hn">${i + 1}</span>
+        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+          파${h.par} · 베스트 ${esc(best.name)} ${h.scores[best.id]}타(${holeLabel(h.scores[best.id], h.par)}) · 평균 ${avg}
+          ${tags.length ? ` · ${tags.join(" ")}` : ""}
+        </span>
+      </div>
+    </div>
+  `;
+}
+
+// ---- 단체전: 시상 결과 ----
+function renderGroupFinal(ro) {
+  const g = computeGroup(state);
+  const listText = (arr) => arr.map((x) => `${x.hole}번홀 ${x.name}`).join(" · ");
+
+  let html = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin:16px 0 4px; gap:10px;">
+      <h1 style="margin:0; font-size:18px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(state.title)}</h1>
+      <button class="btn-ghost" id="${ro ? "closeBtn" : "resetBtn"}" style="flex-shrink:0;">${ro ? "닫기" : "새 라운드"}</button>
+    </div>
+    <div class="progress">${dateLabel(state.startedAt)} · ${state.players.length}명 · 코스 파 ${g.coursePar}</div>
+  `;
+
+  html += `<label>시상</label><div class="card" style="padding:0;">`;
+  if (g.peoriaWinner) {
+    html += `
+      <div class="award">
+        <div class="ico">🏆</div>
+        <div class="body">
+          <div class="cat">우승 · 신페리오</div>
+          <div class="who">${esc(g.peoriaWinner.name)}</div>
+          <div class="det">넷 ${g.peoriaWinner.net}타 (총 ${g.peoriaWinner.total}타 − 핸디 ${g.peoriaWinner.handicap})${
+            state.excludeGross && g.grossWinner && g.peoria[0] && g.peoria[0].id !== g.peoriaWinner.id
+              ? ` · ${esc(g.peoria[0].name)}는 타수 1등이라 제외` : ""
+          }</div>
+        </div>
+      </div>
+    `;
+  }
+  if (g.grossWinner) {
+    html += `
+      <div class="award">
+        <div class="ico">🥇</div>
+        <div class="body">
+          <div class="cat">메달리스트 · 타수 1등</div>
+          <div class="who">${esc(g.grossWinner.name)}</div>
+          <div class="det">${g.grossWinner.total}타 (${g.grossWinner.vsPar > 0 ? "+" : ""}${g.grossWinner.vsPar})${
+            g.gross[1] && g.gross[1].total === g.grossWinner.total ? " · 동타, 카운트백으로 결정" : ""
+          }</div>
+        </div>
+      </div>
+    `;
+  }
+  html += `
+    <div class="award">
+      <div class="ico">🎯</div>
+      <div class="body">
+        <div class="cat">니어리스트 · 파3</div>
+        <div class="who">${g.nearestTally.length ? esc(g.nearestTally.map(([n, c]) => c > 1 ? `${n} ${c}회` : n).join(", ")) : "기록 없음"}</div>
+        ${g.nearest.length ? `<div class="det">${esc(listText(g.nearest))}</div>` : ""}
+      </div>
+    </div>
+    <div class="award">
+      <div class="ico">💥</div>
+      <div class="body">
+        <div class="cat">롱기스트 · 파5</div>
+        <div class="who">${g.longestTally.length ? esc(g.longestTally.map(([n, c]) => c > 1 ? `${n} ${c}회` : n).join(", ")) : "기록 없음"}</div>
+        ${g.longest.length ? `<div class="det">${esc(listText(g.longest))}</div>` : ""}
+      </div>
+    </div>
+  </div>`;
+
+  if (g.peoriaReady) {
+    html += `
+      <div class="final-banner">
+        <div class="title">신페리오 · 페리오 홀 공개</div>
+        <div class="peoria-list">${state.peoriaHoles.map((i) => i + 1).join(", ")}번 홀 (전·후반 각 6홀)</div>
+      </div>
+    `;
+  }
+
+  const ranked = g.peoriaReady ? g.peoria : g.gross;
+  html += `
+    <label>전체 순위 ${g.peoriaReady ? "(신페리오 넷 기준)" : "(타수 기준)"}</label>
+    <div class="card">
+      <table class="result-table">
+        <tr>
+          <th>순위</th><th style="text-align:left;">이름</th><th>타수</th>
+          ${g.peoriaReady ? "<th>핸디</th><th>넷</th>" : "<th>파대비</th>"}
+        </tr>
+        ${ranked.map((r, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td class="name">${esc(r.name)}</td>
+            <td>${r.total}</td>
+            ${g.peoriaReady
+              ? `<td>${r.handicap}</td><td>${r.net}</td>`
+              : `<td>${r.vsPar > 0 ? "+" : ""}${r.vsPar}</td>`}
+          </tr>
+        `).join("")}
+      </table>
+    </div>
+    <button class="btn-secondary" id="copyBtn" style="width:100%;">결과 복사 (카톡 공유용)</button>
+  `;
+
+  html += `<label class="section-gap">홀별 기록</label><div class="card" style="padding:0;">`;
+  for (let i = g.done - 1; i >= 0; i--) html += groupHoleRow(state, i);
+  html += `</div>`;
+
+  root.innerHTML = html;
+
+  document.getElementById("copyBtn").onclick = () => copyText(groupSummaryText(state, g));
+
+  if (ro) {
+    document.getElementById("closeBtn").onclick = () => { viewing = null; render(); };
+  } else {
+    // 마지막 홀 오타도 고칠 수 있도록 결과 화면에서 홀을 눌러 수정할 수 있게 둔다.
+    document.querySelectorAll(".hole-row").forEach((el) => {
+      el.onclick = () => {
+        editingIdx = parseInt(el.dataset.idx, 10);
+        groupDraft = null;
+        render();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+    });
+    bindResetButton();
+  }
+}
+
+function groupSummaryText(st, g) {
+  const L = [];
+  L.push(`[${st.title}] ${dateLabel(st.startedAt)}`);
+  L.push(`${st.players.length}명 · 코스 파 ${g.coursePar}`);
+  L.push("");
+  if (g.peoriaWinner) L.push(`🏆 우승(신페리오) ${g.peoriaWinner.name} — 넷 ${g.peoriaWinner.net}타`);
+  if (g.grossWinner) L.push(`🥇 메달리스트 ${g.grossWinner.name} — ${g.grossWinner.total}타`);
+  if (g.nearest.length) L.push(`🎯 니어 ${g.nearest.map((x) => `${x.hole}H ${x.name}`).join(", ")}`);
+  if (g.longest.length) L.push(`💥 롱기 ${g.longest.map((x) => `${x.hole}H ${x.name}`).join(", ")}`);
+  L.push("");
+  L.push("— 전체 순위 —");
+  const ranked = g.peoriaReady ? g.peoria : g.gross;
+  ranked.forEach((r, i) => {
+    L.push(g.peoriaReady
+      ? `${i + 1}. ${r.name}  ${r.total}타 / 핸디 ${r.handicap} / 넷 ${r.net}`
+      : `${i + 1}. ${r.name}  ${r.total}타 (${r.vsPar > 0 ? "+" : ""}${r.vsPar})`);
+  });
+  return L.join("\n");
 }
 
 function bindResetButton() {
   const resetBtn = document.getElementById("resetBtn");
   if (resetBtn) {
     resetBtn.onclick = () => {
-      if (confirm("새 라운드를 시작하면 현재 기록이 사라집니다. 계속할까요?")) {
+      const played = state ? doneCount(state) : 0;
+      const msg = played > 0
+        ? `진행 중인 ${played}홀 기록을 보관함에 저장하고 새 라운드를 시작할까요?`
+        : "새 라운드를 시작할까요?";
+      if (confirm(msg)) {
+        if (played > 0) archiveRound(state);
         localStorage.removeItem(STORE_KEY);
         state = null;
         editingIdx = null;
         pendingPar = null;
+        groupDraft = null;
+        groupTab = 0;
         render();
       }
     };
