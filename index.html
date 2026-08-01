@@ -6,397 +6,295 @@
 <meta name="theme-color" content="#0E3B2E" />
 <title>골프 스코어 정산</title>
 <style>
-  :root {
-    --bg: #0E3B2E;
-    --panel: #0A2C22;
-    --panelLight: #134534;
-    --cream: #F2EBD8;
-    --creamDim: rgba(242,235,216,0.55);
-    --line: rgba(242,235,216,0.14);
-    --red: #E4572E;
-    --brass: #C8A96A;
-    --ok: #7FD1A8;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--cream); }
-  body {
-    font-family: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-  }
-  #app { max-width: 480px; margin: 0 auto; padding: 20px 16px 60px; }
-  .hidden { display: none !important; }
+:root {
+  --bg: #0E3B2E;
+  --panel: #0A2C22;
+  --panelLight: #134534;
+  --cream: #F2EBD8;
+  --creamDim: rgba(242,235,216,0.55);
+  --line: rgba(242,235,216,0.14);
+  --red: #E4572E;
+  --brass: #C8A96A;
+  --ok: #7FD1A8;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--cream); }
+body {
+  font-family: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+}
+#app { max-width: 480px; margin: 0 auto; padding: 20px 16px 60px; }
+.hidden { display: none !important; }
 
-  h1 { font-size: 20px; margin: 16px 0 4px; }
-  .subtitle { font-size: 13px; color: var(--creamDim); margin-bottom: 20px; line-height: 1.5; }
+h1 { font-size: 20px; margin: 16px 0 4px; }
+.subtitle { font-size: 13px; color: var(--creamDim); margin-bottom: 20px; line-height: 1.5; }
 
-  .card {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    padding: 16px;
-    margin-bottom: 14px;
-  }
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
 
-  label { display: block; font-size: 12px; color: var(--brass); font-weight: 700; margin: 12px 0 6px; letter-spacing: 0.04em; }
-  label:first-child { margin-top: 0; }
+label { display: block; font-size: 12px; color: var(--brass); font-weight: 700; margin: 12px 0 6px; letter-spacing: 0.04em; }
+label:first-child { margin-top: 0; }
 
-  input[type="text"], input[type="number"] {
-    width: 100%;
-    padding: 11px 12px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    color: var(--cream);
-    font-size: 15px;
-    font-family: inherit;
-    outline: none;
-  }
+input[type="text"], input[type="number"] {
+  width: 100%;
+  padding: 11px 12px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--cream);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+}
 
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
-  button { font-family: inherit; cursor: pointer; }
-  .btn-primary {
-    width: 100%; padding: 13px 0; background: var(--cream); color: var(--bg);
-    border: none; border-radius: 4px; font-weight: 800; font-size: 15px; margin-top: 16px;
-  }
-  .btn-ghost {
-    padding: 8px 14px; background: transparent; color: var(--brass);
-    border: 1px solid var(--brass); border-radius: 4px; font-weight: 700; font-size: 12.5px;
-  }
-  .mode-btn {
-    padding: 12px 4px; background: transparent; color: var(--brass);
-    border: 1px solid var(--line); border-radius: 4px; font-weight: 700; font-size: 12.5px;
-    text-align: center; line-height: 1.4;
-  }
-  .mode-btn.active { background: var(--brass); color: var(--panel); border-color: var(--brass); }
-  .mode-btn .sub { display: block; font-size: 10.5px; font-weight: 500; color: inherit; opacity: 0.8; margin-top: 2px; }
+button { font-family: inherit; cursor: pointer; }
+.btn-primary {
+  width: 100%; padding: 13px 0; background: var(--cream); color: var(--bg);
+  border: none; border-radius: 4px; font-weight: 800; font-size: 15px; margin-top: 16px;
+}
+.btn-ghost {
+  padding: 8px 14px; background: transparent; color: var(--brass);
+  border: 1px solid var(--brass); border-radius: 4px; font-weight: 700; font-size: 12.5px;
+}
+.mode-btn {
+  padding: 12px 4px; background: transparent; color: var(--brass);
+  border: 1px solid var(--line); border-radius: 4px; font-weight: 700; font-size: 12.5px;
+  text-align: center; line-height: 1.4;
+}
+.mode-btn.active { background: var(--brass); color: var(--panel); border-color: var(--brass); }
+.mode-btn .sub { display: block; font-size: 10.5px; font-weight: 500; color: inherit; opacity: 0.8; margin-top: 2px; }
 
-  .team-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 800; letter-spacing: 0.03em; }
-  .team-a { color: var(--brass); border: 1px solid var(--brass); }
-  .team-b { color: var(--red); border: 1px solid var(--red); }
+.team-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 800; letter-spacing: 0.03em; }
+.team-a { color: var(--brass); border: 1px solid var(--brass); }
+.team-b { color: var(--red); border: 1px solid var(--red); }
 
-  .player-badge {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 20px; height: 20px; border-radius: 50%;
-    border: 1px solid var(--brass); color: var(--brass);
-    font-size: 11px; font-weight: 800; flex-shrink: 0;
-  }
+.player-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 1px solid var(--brass); color: var(--brass);
+  font-size: 11px; font-weight: 800; flex-shrink: 0;
+}
 
-  .summary {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 14px;
-  }
-  .summary > div { padding: 14px; text-align: center; background: var(--panel); }
-  .summary .amt { font-size: 24px; font-weight: 900; font-variant-numeric: tabular-nums; margin-top: 4px; }
-  .net-line { text-align: center; font-size: 13.5px; color: var(--creamDim); margin: -4px 0 14px; }
-  .net-line b { color: var(--ok); }
+.summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.summary > div { padding: 14px; text-align: center; background: var(--panel); }
+.summary .amt { font-size: 24px; font-weight: 900; font-variant-numeric: tabular-nums; margin-top: 4px; }
+.net-line { text-align: center; font-size: 13.5px; color: var(--creamDim); margin: -4px 0 14px; }
+.net-line b { color: var(--ok); }
 
-  .progress { text-align: center; font-size: 12.5px; color: var(--creamDim); margin-bottom: 14px; }
+.progress { text-align: center; font-size: 12.5px; color: var(--creamDim); margin-bottom: 14px; }
 
-  .hole-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
-  .hole-head .n { font-size: 22px; font-weight: 900; }
-  .pot-tag { font-size: 13px; color: var(--brass); font-weight: 700; }
-  .pot-tag .carry { color: var(--red); }
+.hole-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.hole-head .n { font-size: 22px; font-weight: 900; }
+.pot-tag { font-size: 13px; color: var(--brass); font-weight: 700; }
+.pot-tag .carry { color: var(--red); }
 
-  .bonus-banner {
-    background: linear-gradient(135deg, rgba(200,169,106,0.28), rgba(228,87,46,0.2));
-    border: 1px solid var(--brass);
-    border-radius: 4px;
-    padding: 10px 14px;
-    margin-bottom: 14px;
-    text-align: center;
-    font-weight: 800;
-    font-size: 14px;
-    color: var(--brass);
-  }
+.bonus-banner {
+  background: linear-gradient(135deg, rgba(200,169,106,0.28), rgba(228,87,46,0.2));
+  border: 1px solid var(--brass);
+  border-radius: 4px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--brass);
+}
 
-  .par-row { display: flex; gap: 8px; margin-bottom: 14px; }
-  .par-btn {
-    flex: 1; padding: 9px 0; background: transparent; color: var(--brass);
-    border: 1px solid var(--line); border-radius: 4px; font-weight: 700; font-size: 13px;
-  }
-  .par-btn.active { background: var(--brass); color: var(--panel); border-color: var(--brass); }
+.par-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.par-btn {
+  flex: 1; padding: 9px 0; background: transparent; color: var(--brass);
+  border: 1px solid var(--line); border-radius: 4px; font-weight: 700; font-size: 13px;
+}
+.par-btn.active { background: var(--brass); color: var(--panel); border-color: var(--brass); }
 
-  .player-block { margin-bottom: 14px; }
-  .player-block .pname { font-size: 14px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
-  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
-  .chip {
-    padding: 6px 10px; background: transparent; color: var(--creamDim);
-    border: 1px solid var(--line); border-radius: 12px; font-size: 12px; font-weight: 700;
-  }
+.player-block { margin-bottom: 14px; }
+.player-block .pname { font-size: 14px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.chip {
+  padding: 6px 10px; background: transparent; color: var(--creamDim);
+  border: 1px solid var(--line); border-radius: 12px; font-size: 12px; font-weight: 700;
+}
 
-  .player-input { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-  .player-input .pname { flex: 1; font-size: 14px; font-weight: 600; }
-  .player-input input { width: 72px; text-align: center; }
+.player-input { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.player-input .pname { flex: 1; font-size: 14px; font-weight: 600; }
+.player-input input { width: 72px; text-align: center; }
 
-  .hole-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 11px 14px; border-top: 1px solid var(--line); font-size: 13.5px; cursor: pointer;
-  }
-  .hole-row:first-child { border-top: none; }
-  .hole-row .left { display: flex; gap: 10px; align-items: center; }
-  .hole-row .hn { color: var(--creamDim); width: 22px; }
-  .hole-row .result { font-weight: 700; }
-  .hole-row .result.win-a { color: var(--brass); }
-  .hole-row .result.win-b { color: var(--red); }
-  .hole-row .result.carry { color: var(--creamDim); }
+.hole-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 14px; border-top: 1px solid var(--line); font-size: 13.5px; cursor: pointer;
+}
+.hole-row:first-child { border-top: none; }
+.hole-row .left { display: flex; gap: 10px; align-items: center; }
+.hole-row .hn { color: var(--creamDim); width: 22px; }
+.hole-row .result { font-weight: 700; }
+.hole-row .result.win-a { color: var(--brass); }
+.hole-row .result.win-b { color: var(--red); }
+.hole-row .result.carry { color: var(--creamDim); }
 
-  .final-banner {
-    background: var(--panelLight);
-    border: 1px solid var(--ok);
-    border-radius: 4px;
-    padding: 16px;
-    margin-bottom: 14px;
-    text-align: center;
-  }
-  .final-banner .title { color: var(--ok); font-weight: 800; font-size: 13px; margin-bottom: 6px; }
-  .final-banner .amount { font-size: 26px; font-weight: 900; }
+.final-banner {
+  background: var(--panelLight);
+  border: 1px solid var(--ok);
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 14px;
+  text-align: center;
+}
+.final-banner .title { color: var(--ok); font-weight: 800; font-size: 13px; margin-bottom: 6px; }
+.final-banner .amount { font-size: 26px; font-weight: 900; }
 
-  .empty-note {
-    padding: 16px;
-    text-align: center;
-    color: var(--creamDim);
-    font-size: 13px;
-    font-style: italic;
-  }
+.empty-note {
+  padding: 16px;
+  text-align: center;
+  color: var(--creamDim);
+  font-size: 13px;
+  font-style: italic;
+}
 
-  table.result-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  table.result-table th, table.result-table td {
-    padding: 8px 6px; text-align: center; border-bottom: 1px solid var(--line);
-  }
-  table.result-table th { color: var(--brass); font-size: 11px; font-weight: 700; }
-  table.result-table td.name { text-align: left; font-weight: 700; }
-  table.result-table tr:first-child td { color: var(--ok); font-weight: 800; }
+table.result-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.result-table th, table.result-table td {
+  padding: 8px 6px; text-align: center; border-bottom: 1px solid var(--line);
+}
+table.result-table th { color: var(--brass); font-size: 11px; font-weight: 700; }
+table.result-table td.name { text-align: left; font-weight: 700; }
+table.result-table tr:first-child td { color: var(--ok); font-weight: 800; }
 
-  .settle-row {
-    display: flex; justify-content: space-between; padding: 10px 14px;
-    border-top: 1px solid var(--line); font-size: 13.5px;
-  }
-  .settle-row:first-child { border-top: none; }
-  .settle-row .amt.pos { color: var(--ok); font-weight: 800; }
-  .settle-row .amt.neg { color: var(--red); font-weight: 800; }
+.settle-row {
+  display: flex; justify-content: space-between; padding: 10px 14px;
+  border-top: 1px solid var(--line); font-size: 13.5px;
+}
+.settle-row:first-child { border-top: none; }
+.settle-row .amt.pos { color: var(--ok); font-weight: 800; }
+.settle-row .amt.neg { color: var(--red); font-weight: 800; }
 
-  .peoria-list { font-size: 12.5px; color: var(--creamDim); line-height: 1.8; }
-  .section-gap { margin-top: 22px; }
+.peoria-list { font-size: 12.5px; color: var(--creamDim); line-height: 1.8; }
+.section-gap { margin-top: 22px; }
 
-  /* ---- 단체전 ---- */
-  .mode-wide { width: 100%; margin-top: 8px; }
+/* ---- 단체전 ---- */
+.mode-wide { width: 100%; margin-top: 8px; }
 
-  .tab-row { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; }
-  .tab {
-    flex: 1; min-width: 64px; padding: 9px 0; background: transparent; color: var(--creamDim);
-    border: 1px solid var(--line); border-radius: 4px; font-weight: 700; font-size: 12.5px;
-  }
-  .tab.active { background: var(--panelLight); color: var(--cream); border-color: var(--brass); }
+.tab-row { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; }
+.tab {
+  flex: 1; min-width: 64px; padding: 9px 0; background: transparent; color: var(--creamDim);
+  border: 1px solid var(--line); border-radius: 4px; font-weight: 700; font-size: 12.5px;
+}
+.tab.active { background: var(--panelLight); color: var(--cream); border-color: var(--brass); }
 
-  .grow {
-    display: flex; align-items: center; gap: 8px;
-    padding: 9px 0; border-top: 1px solid var(--line);
-  }
-  .grow:first-of-type { border-top: none; }
-  .grow .gname { flex: 1; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; min-width: 0; }
-  .grow .gname span.nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .cart-pill {
-    font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 3px;
-    border: 1px solid var(--line); color: var(--creamDim); flex-shrink: 0;
-  }
-  .stepper { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-  .stepper button {
-    width: 34px; height: 34px; background: var(--panelLight); color: var(--cream);
-    border: 1px solid var(--line); border-radius: 4px; font-size: 18px; font-weight: 800; line-height: 1;
-  }
-  .stepper .val { width: 46px; text-align: center; }
-  .stepper .val .num { font-size: 18px; font-weight: 900; display: block; line-height: 1.1; }
-  .stepper .val .rel { font-size: 10px; color: var(--creamDim); }
-  .stepper .val .rel.over { color: var(--red); }
-  .stepper .val .rel.under { color: var(--ok); }
-  .stepper .oy {
-    width: auto; padding: 0 8px; height: 34px; font-size: 11px; font-weight: 700; color: var(--brass);
-    background: transparent;
-  }
+.grow {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 0; border-top: 1px solid var(--line);
+}
+.grow:first-of-type { border-top: none; }
+.grow .gname { flex: 1; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; min-width: 0; }
+.grow .gname span.nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cart-pill {
+  font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 3px;
+  border: 1px solid var(--line); color: var(--creamDim); flex-shrink: 0;
+}
+.stepper { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.stepper button {
+  width: 34px; height: 34px; background: var(--panelLight); color: var(--cream);
+  border: 1px solid var(--line); border-radius: 4px; font-size: 18px; font-weight: 800; line-height: 1;
+}
+.stepper .val { width: 46px; text-align: center; }
+.stepper .val .num { font-size: 18px; font-weight: 900; display: block; line-height: 1.1; }
+.stepper .val .rel { font-size: 10px; color: var(--creamDim); }
+.stepper .val .rel.over { color: var(--red); }
+.stepper .val .rel.under { color: var(--ok); }
+.stepper .oy {
+  width: auto; padding: 0 8px; height: 34px; font-size: 11px; font-weight: 700; color: var(--brass);
+  background: transparent;
+}
 
-  .special-box {
-    background: var(--panelLight); border: 1px solid var(--brass); border-radius: 4px;
-    padding: 12px; margin: 4px 0 14px;
-  }
-  .special-box .lab { font-size: 12px; font-weight: 800; color: var(--brass); margin-bottom: 8px; }
-  .name-chip {
-    padding: 7px 11px; background: transparent; color: var(--creamDim);
-    border: 1px solid var(--line); border-radius: 14px; font-size: 12.5px; font-weight: 700;
-  }
-  .name-chip.on { background: var(--brass); color: var(--panel); border-color: var(--brass); }
+.special-box {
+  background: var(--panelLight); border: 1px solid var(--brass); border-radius: 4px;
+  padding: 12px; margin: 4px 0 14px;
+}
+.special-box .lab { font-size: 12px; font-weight: 800; color: var(--brass); margin-bottom: 8px; }
+.name-chip {
+  padding: 7px 11px; background: transparent; color: var(--creamDim);
+  border: 1px solid var(--line); border-radius: 14px; font-size: 12.5px; font-weight: 700;
+}
+.name-chip.on { background: var(--brass); color: var(--panel); border-color: var(--brass); }
 
-  .award {
-    display: flex; align-items: center; gap: 12px; padding: 13px 14px;
-    border-top: 1px solid var(--line);
-  }
-  .award:first-child { border-top: none; }
-  .award .ico { font-size: 22px; width: 26px; text-align: center; }
-  .award .body { flex: 1; min-width: 0; }
-  .award .cat { font-size: 11px; font-weight: 800; color: var(--brass); letter-spacing: 0.04em; }
-  .award .who { font-size: 16px; font-weight: 900; margin-top: 1px; }
-  .award .det { font-size: 11.5px; color: var(--creamDim); margin-top: 2px; line-height: 1.5; }
+.award {
+  display: flex; align-items: center; gap: 12px; padding: 13px 14px;
+  border-top: 1px solid var(--line);
+}
+.award:first-child { border-top: none; }
+.award .ico { font-size: 22px; width: 26px; text-align: center; }
+.award .body { flex: 1; min-width: 0; }
+.award .cat { font-size: 11px; font-weight: 800; color: var(--brass); letter-spacing: 0.04em; }
+.award .who { font-size: 16px; font-weight: 900; margin-top: 1px; }
+.award .det { font-size: 11.5px; color: var(--creamDim); margin-top: 2px; line-height: 1.5; }
 
-  .round-item {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    padding: 12px 14px; border-top: 1px solid var(--line); cursor: pointer;
-  }
-  .round-item:first-child { border-top: none; }
-  .round-item .t { font-size: 13.5px; font-weight: 700; }
-  .round-item .s { font-size: 11.5px; color: var(--creamDim); margin-top: 3px; }
-  .round-item .del { color: var(--creamDim); font-size: 16px; background: none; border: none; padding: 4px 6px; }
+.round-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 12px 14px; border-top: 1px solid var(--line); cursor: pointer;
+}
+.round-item:first-child { border-top: none; }
+.round-item .t { font-size: 13.5px; font-weight: 700; }
+.round-item .s { font-size: 11.5px; color: var(--creamDim); margin-top: 3px; }
+.round-item .del { color: var(--creamDim); font-size: 16px; background: none; border: none; padding: 4px 6px; }
 
-  .pl-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .pl-row .idx { width: 18px; font-size: 12px; color: var(--creamDim); flex-shrink: 0; }
-  .pl-row input { flex: 1; min-width: 0; }
-  .pl-row select {
-    width: 74px; padding: 11px 6px; background: var(--bg); color: var(--cream);
-    border: 1px solid var(--line); border-radius: 4px; font-family: inherit; font-size: 13px;
-  }
-  .pl-row .rm { background: none; border: none; color: var(--creamDim); font-size: 18px; padding: 4px 2px; }
+.pl-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.pl-row .idx { width: 18px; font-size: 12px; color: var(--creamDim); flex-shrink: 0; }
+.pl-row input { flex: 1; min-width: 0; }
+.pl-row select {
+  width: 74px; padding: 11px 6px; background: var(--bg); color: var(--cream);
+  border: 1px solid var(--line); border-radius: 4px; font-family: inherit; font-size: 13px;
+}
+.pl-row .rm { background: none; border: none; color: var(--creamDim); font-size: 18px; padding: 4px 2px; }
 
-  .toggle-row {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    padding: 11px 0; border-top: 1px solid var(--line);
-  }
-  .toggle-row .tl { font-size: 13.5px; font-weight: 600; }
-  .toggle-row .td { font-size: 11.5px; color: var(--creamDim); margin-top: 3px; line-height: 1.45; }
-  .sw {
-    width: 46px; height: 26px; border-radius: 13px; border: 1px solid var(--line);
-    background: var(--bg); position: relative; flex-shrink: 0;
-  }
-  .sw::after {
-    content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
-    border-radius: 50%; background: var(--creamDim); transition: all .15s;
-  }
-  .sw.on { background: var(--brass); border-color: var(--brass); }
-  .sw.on::after { left: 22px; background: var(--panel); }
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 11px 0; border-top: 1px solid var(--line);
+}
+.toggle-row .tl { font-size: 13.5px; font-weight: 600; }
+.toggle-row .td { font-size: 11.5px; color: var(--creamDim); margin-top: 3px; line-height: 1.45; }
+.sw {
+  width: 46px; height: 26px; border-radius: 13px; border: 1px solid var(--line);
+  background: var(--bg); position: relative; flex-shrink: 0;
+}
+.sw::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+  border-radius: 50%; background: var(--creamDim); transition: all .15s;
+}
+.sw.on { background: var(--brass); border-color: var(--brass); }
+.sw.on::after { left: 22px; background: var(--panel); }
 
-  .warn-note {
-    font-size: 11.5px; color: var(--red); margin-top: 8px; line-height: 1.5;
-  }
-  .btn-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-  .btn-secondary {
-    padding: 12px 0; background: transparent; color: var(--brass);
-    border: 1px solid var(--brass); border-radius: 4px; font-weight: 800; font-size: 13.5px;
-  }
-  .toast {
-    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
-    background: var(--cream); color: var(--bg); padding: 10px 18px; border-radius: 20px;
-    font-size: 13px; font-weight: 800; z-index: 99; box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-  }
+.warn-note {
+  font-size: 11.5px; color: var(--red); margin-top: 8px; line-height: 1.5;
+}
+.btn-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.btn-secondary {
+  padding: 12px 0; background: transparent; color: var(--brass);
+  border: 1px solid var(--brass); border-radius: 4px; font-weight: 800; font-size: 13.5px;
+}
+.toast {
+  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
+  background: var(--cream); color: var(--bg); padding: 10px 18px; border-radius: 20px;
+  font-size: 13px; font-weight: 800; z-index: 99; box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+}
 </style>
 </head>
 <body>
 <div id="app"></div>
-
 <script>
-const STORE_KEY = "golfScoring:state";
-const ROUNDS_KEY = "golfScoring:rounds";   // 종료된 라운드 보관함
-const ROSTER_KEY = "golfScoring:roster";   // 자주 오는 참가자 이름
-const PLAYER_KEYS = ["a1", "a2", "b1", "b2"];
-const BONUS_MULTIPLIER = 2;
-const MAX_ARCHIVE = 60;
-
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
-function saveState(state) {
-  // 사파리 사생활 보호 모드 등에서 저장이 막히면 조용히 날아가는 대신 알려준다.
-  try {
-    localStorage.setItem(STORE_KEY, JSON.stringify(state));
-  } catch (e) {
-    alert("기록 저장에 실패했습니다. 브라우저의 사생활 보호 모드를 끄고 다시 시도해주세요.");
-  }
-}
-function fmt(n) {
-  return n.toLocaleString("ko-KR");
-}
-
-// ---- 보관함: 새 라운드를 시작해도 지난 라운드가 남도록 별도 키에 쌓는다 ----
-function loadRounds() {
-  try {
-    const raw = localStorage.getItem(ROUNDS_KEY);
-    const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? arr : [];
-  } catch { return []; }
-}
-function saveRounds(rounds) {
-  localStorage.setItem(ROUNDS_KEY, JSON.stringify(rounds.slice(0, MAX_ARCHIVE)));
-}
-// 같은 라운드를 두 번 저장하지 않도록 startedAt을 식별자로 쓴다.
-function archiveRound(st) {
-  if (!st) return false;
-  const rounds = loadRounds();
-  // data-id는 항상 문자열로 돌아오므로 식별자도 문자열로 통일한다.
-  const started = st.startedAt || Date.now();
-  const id = String(started);
-  const snapshot = { ...st, startedAt: started };
-  const existing = rounds.findIndex((r) => r.id === id);
-  const entry = { id, savedAt: Date.now(), state: snapshot };
-  if (existing >= 0) rounds[existing] = entry;
-  else rounds.unshift(entry);
-  saveRounds(rounds);
-  return true;
-}
-function deleteRound(id) {
-  saveRounds(loadRounds().filter((r) => r.id !== id));
-}
-
-function loadRoster() {
-  try {
-    const raw = localStorage.getItem(ROSTER_KEY);
-    const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? arr : [];
-  } catch { return []; }
-}
-// 최근에 같이 친 사람이 앞으로 오도록 정렬해두면 다음 모임에서 탭 몇 번으로 명단이 완성된다.
-function rememberNames(names) {
-  const clean = names.map((n) => String(n).trim()).filter(Boolean);
-  const merged = [...clean, ...loadRoster().filter((n) => !clean.includes(n))];
-  localStorage.setItem(ROSTER_KEY, JSON.stringify(merged.slice(0, 40)));
-}
-
-function dateLabel(ts) {
-  const d = new Date(ts);
-  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
-}
-function esc(s) {
-  return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
-function toast(msg) {
-  const el = document.createElement("div");
-  el.className = "toast";
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1800);
-}
-function copyText(text) {
-  const done = () => toast("복사했습니다");
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done));
-  } else {
-    fallbackCopy(text, done);
-  }
-}
-function fallbackCopy(text, done) {
-  const ta = document.createElement("textarea");
-  ta.value = text;
-  ta.style.position = "fixed";
-  ta.style.opacity = "0";
-  document.body.appendChild(ta);
-  ta.select();
-  try { document.execCommand("copy"); done(); } catch { alert(text); }
-  ta.remove();
-}
-
+// ---- core/random.js ----
 // ---- 스킨스: 보너스 홀 뽑기 (전반 중 1홀, 후반 있으면 후반 중 1홀) ----
 function pickBonusHoles(totalHoles) {
   const frontCount = Math.min(9, totalHoles);
@@ -423,6 +321,16 @@ function pickPeoriaHoles() {
   const back = [9, 10, 11, 12, 13, 14, 15, 16, 17];
   return [...sample(front, 6), ...sample(back, 6)].sort((a, b) => a - b);
 }
+
+function uid() {
+  return Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-3);
+}
+
+
+// ---- core/skins.js ----
+
+const PLAYER_KEYS = ["a1", "a2", "b1", "b2"];
+const BONUS_MULTIPLIER = 2;
 
 // mode: "skins" | "peoria" | "both" — 신페리오가 포함되면 18홀 고정(페리오 홀 규칙상 필수).
 function newState(mode, names, totalHoles, skinsStake, peoriaStake) {
@@ -465,6 +373,26 @@ function computeSkins(state) {
   return { rows, carry, totalA, totalB, currentIdx: rows.length };
 }
 
+function defaultPar(state, beforeIdx) {
+  for (let i = beforeIdx - 1; i >= 0; i--) {
+    if (state.holes[i].par != null) return state.holes[i].par;
+  }
+  return 4;
+}
+
+// 완료된 홀 수 — par와 4명 타수가 전부 채워진 선두 구간 길이.
+function countDone(state) {
+  let n = 0;
+  for (const h of state.holes) {
+    if (h.par == null || PLAYER_KEYS.some((k) => h[k] == null)) break;
+    n++;
+  }
+  return n;
+}
+
+
+// ---- core/peoria.js ----
+
 // 신페리오 핸디캡: 페리오 12홀 합계 × 1.5 = 추정 스코어, (추정 스코어 - 코스파) × 0.8 = 핸디캡(반올림).
 // 넷스코어 = 총타수 - 핸디캡. 모든 쌍(i,j)이 넷스코어 차이 × 타당 금액으로 주고받는 제로섬 정산.
 function computePeoria(state) {
@@ -498,13 +426,12 @@ function computePeoria(state) {
   return { coursePar, results, pairwise };
 }
 
+
+// ---- core/group.js ----
+
 // ===================== 단체전 =====================
 // 인원 가변(보통 2카트 8명, 그 이상도 가능). 팀 정산이 아니라 시상이 목적이라
 // 타수 1등 / 신페리오 1등 / 파3 니어 / 파5 롱기를 뽑는다.
-function uid() {
-  return Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-3);
-}
-
 function newGroupState(opts) {
   const totalHoles = 18; // 신페리오·카운트백 모두 18홀 기준
   return {
@@ -608,6 +535,8 @@ function computeGroup(state) {
   };
 }
 
+
+// ---- core/labels.js ----
 // 파 대비 스코어 용어 — 칩 버튼과 홀별 기록 표시에 공용으로 쓴다.
 // "트리플+"처럼 "이상"을 뜻하는 라벨을 쓰면 눌렀을 때 실제로는 +3만 들어가는 것과 헷갈려서
 // (파4에서 4오버를 의도하고 이 칩을 눌렀지만 실제로는 3오버=7타만 저장된 사례) 델타를 하나씩 명확히 늘어놓는다.
@@ -632,22 +561,115 @@ function holeLabel(v, par) {
   return delta > 0 ? `+${delta}` : `${delta}`;
 }
 
-function defaultPar(state, beforeIdx) {
-  for (let i = beforeIdx - 1; i >= 0; i--) {
-    if (state.holes[i].par != null) return state.holes[i].par;
+
+// ---- data/storage.js ----
+const STORE_KEY = "golfScoring:state";
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+function saveState(state) {
+  // 사파리 사생활 보호 모드 등에서 저장이 막히면 조용히 날아가는 대신 알려준다.
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  } catch (e) {
+    alert("기록 저장에 실패했습니다. 브라우저의 사생활 보호 모드를 끄고 다시 시도해주세요.");
   }
-  return 4;
 }
 
-// 완료된 홀 수 — par와 4명 타수가 전부 채워진 선두 구간 길이.
-function countDone(state) {
-  let n = 0;
-  for (const h of state.holes) {
-    if (h.par == null || PLAYER_KEYS.some((k) => h[k] == null)) break;
-    n++;
-  }
-  return n;
+
+// ---- data/rounds.js ----
+const ROUNDS_KEY = "golfScoring:rounds";   // 종료된 라운드 보관함
+const ROSTER_KEY = "golfScoring:roster";   // 자주 오는 참가자 이름
+const MAX_ARCHIVE = 60;
+
+// ---- 보관함: 새 라운드를 시작해도 지난 라운드가 남도록 별도 키에 쌓는다 ----
+function loadRounds() {
+  try {
+    const raw = localStorage.getItem(ROUNDS_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
 }
+function saveRounds(rounds) {
+  localStorage.setItem(ROUNDS_KEY, JSON.stringify(rounds.slice(0, MAX_ARCHIVE)));
+}
+// 같은 라운드를 두 번 저장하지 않도록 startedAt을 식별자로 쓴다.
+function archiveRound(st) {
+  if (!st) return false;
+  const rounds = loadRounds();
+  // data-id는 항상 문자열로 돌아오므로 식별자도 문자열로 통일한다.
+  const started = st.startedAt || Date.now();
+  const id = String(started);
+  const snapshot = { ...st, startedAt: started };
+  const existing = rounds.findIndex((r) => r.id === id);
+  const entry = { id, savedAt: Date.now(), state: snapshot };
+  if (existing >= 0) rounds[existing] = entry;
+  else rounds.unshift(entry);
+  saveRounds(rounds);
+  return true;
+}
+function deleteRound(id) {
+  saveRounds(loadRounds().filter((r) => r.id !== id));
+}
+
+function loadRoster() {
+  try {
+    const raw = localStorage.getItem(ROSTER_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+// 최근에 같이 친 사람이 앞으로 오도록 정렬해두면 다음 모임에서 탭 몇 번으로 명단이 완성된다.
+function rememberNames(names) {
+  const clean = names.map((n) => String(n).trim()).filter(Boolean);
+  const merged = [...clean, ...loadRoster().filter((n) => !clean.includes(n))];
+  localStorage.setItem(ROSTER_KEY, JSON.stringify(merged.slice(0, 40)));
+}
+
+
+// ---- ui/components.js ----
+function fmt(n) {
+  return n.toLocaleString("ko-KR");
+}
+function dateLabel(ts) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+}
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function toast(msg) {
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1800);
+}
+function copyText(text) {
+  const done = () => toast("복사했습니다");
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done));
+  } else {
+    fallbackCopy(text, done);
+  }
+}
+function fallbackCopy(text, done) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand("copy"); done(); } catch { alert(text); }
+  ta.remove();
+}
+
+
+// ---- ui/app.js ----
 
 let state = loadState();
 let editingIdx = null; // 과거 홀 재입력 중이면 해당 인덱스
@@ -1744,6 +1766,7 @@ function bindResetButton() {
 }
 
 render();
+
 </script>
 </body>
 </html>
