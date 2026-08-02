@@ -826,7 +826,7 @@ async function prepareImage(file) {
 
 // totalHoles/players(이름 배열, 스코어카드 열 순서와 같다고 가정)를 받아 워커에 인식을 요청한다.
 // 성공하면 { holes: [{hole,par,scores:{이름:타수|null}}], warnings: string[] }를 돌려준다.
-export async function scanScorecard(file, { totalHoles, players }) {
+async function scanScorecard(file, { totalHoles, players }) {
   let image, mimeType;
   try {
     ({ base64: image, mimeType } = await prepareImage(file));
