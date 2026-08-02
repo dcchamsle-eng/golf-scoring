@@ -729,6 +729,34 @@ function mergePlayers(players, keepId, mergeId) {
     .map((p) => (p.id === keepId ? { ...p, aliases } : p));
 }
 
+// 삭제가 아니라 숨김이다 — 과거 라운드의 playerId 참조가 끊기면 안 되므로 기록은 그대로 둔다.
+// resolvePlayer가 이미 !p.archived로 매칭 대상에서 빼므로, 숨긴 이름이 설정 화면에 다시 입력되면
+// 되살아나지 않고 새 선수가 만들어진다(의도된 동작).
+function archivePlayer(players, id) {
+  return players.map((p) => (p.id === id ? { ...p, archived: true } : p));
+}
+
+// 숨긴 선수를 다시 목록에 보이게 한다("다시 보이기") — archived만 되돌리고 다른 건 안 건드린다.
+function unarchivePlayer(players, id) {
+  return players.map((p) => (p.id === id ? { ...p, archived: false } : p));
+}
+
+// "지난 멤버 그대로" 버튼용 — roundStates(최신순이 아니어도 됨, startedAt으로 직접 정렬한다)에서
+// 지정한 mode 계열의 가장 최근 라운드를 찾아 참가자 구성을 뽑는다. 4인 모드는 mode가
+// "skins"|"peoria"|"both" 중 아무거나면 다 같은 계열로 친다(스킨스만 쳤어도 "지난 멤버"는 유효하니까).
+// 단체전은 mode==="group"인 라운드끼리만 찾는다.
+function findLastLineup(roundStates, family) {
+  const isTarget = (st) => (family === "group" ? st.mode === "group" : st.mode !== "group");
+  const candidates = roundStates.filter((st) => st && isTarget(st));
+  if (candidates.length === 0) return null;
+
+  const latest = candidates.reduce((a, b) => (b.startedAt > a.startedAt ? b : a));
+  if (family === "group") {
+    return { players: latest.players.map((p) => ({ name: p.name, cart: p.cart })) };
+  }
+  return { names: { ...latest.names } };
+}
+
 // 라운드 하나 안에서 fromId를 가리키던 playerId 참조를 toId로 바꾼다. 4인 모드는
 // state.players가 {a1,a2,b1,b2}: playerId map이고, 단체전은 state.players[].playerId다 —
 // 둘 다 라운드 내부 스코어 키(a1/a2/b1/b2, 단체전의 id)는 안 건드리고 playerId만 바꾼다.
@@ -784,6 +812,18 @@ function mergePlayersAndSave(keepId, mergeId) {
 
   const current = loadState();
   if (current) saveState(remapPlayerIdInRound(current, mergeId, keepId));
+}
+
+function archivePlayerAndSave(id) {
+  savePlayers(archivePlayer(loadPlayers(), id));
+}
+function unarchivePlayerAndSave(id) {
+  savePlayers(unarchivePlayer(loadPlayers(), id));
+}
+
+// "지난 멤버 그대로" 버튼용 — 보관함 전체를 훑어 가장 최근 라운드의 참가자 구성을 돌려준다.
+function loadLastLineup(family) {
+  return findLastLineup(loadRounds().map((r) => r.state), family);
 }
 
 
@@ -1086,6 +1126,8 @@ function renderSetup() {
         <input type="text" id="b1" placeholder="${needsSkins ? "B팀 선수1" : "선수3"}" value="${needsSkins ? "B1" : "선수3"}" />
         <input type="text" id="b2" placeholder="${needsSkins ? "B팀 선수2" : "선수4"}" value="${needsSkins ? "B2" : "선수4"}" />
       </div>
+      ${registryChips4pHtml()}
+      <button class="btn-ghost" id="lastLineupBtn" style="width:100%; margin-top:10px;">지난 멤버 그대로</button>
 
       <div id="holesField" class="${needsPeoria ? "hidden" : ""}">
         <label>홀 수</label>
@@ -1116,6 +1158,18 @@ function renderSetup() {
   bindArchive();
   bindSeasonSection();
   bindPlayerSection();
+
+  document.querySelectorAll("[data-reg-add]").forEach((el) => {
+    el.onclick = () => fillFirstEmpty4p(el.dataset.regAdd, needsSkins);
+  });
+  document.getElementById("lastLineupBtn").onclick = () => {
+    const lineup = loadLastLineup("4p");
+    if (!lineup) { alert("지난 라운드 기록이 없습니다."); return; }
+    document.getElementById("a1").value = lineup.names.a1 || "";
+    document.getElementById("a2").value = lineup.names.a2 || "";
+    document.getElementById("b1").value = lineup.names.b1 || "";
+    document.getElementById("b2").value = lineup.names.b2 || "";
+  };
 
   document.getElementById("modeSkins").onclick = () => { setupMode = "skins"; renderSetup(); };
   document.getElementById("modeBoth").onclick = () => { setupMode = "both"; renderSetup(); };
@@ -1388,43 +1442,86 @@ function playerRoundCounts() {
   return counts;
 }
 
+// 4인 모드 이름칸 4개는 항상 기본값("A1" 등)이 채워져 있어 "비어있음"을 빈 문자열로 판단할 수 없다.
+// 아직 손대지 않은 칸(= 기본값 그대로인 칸)을 "비어있음"으로 친다 — 단체전의 !name.trim() 판단과
+// 같은 역할을 사수한 것뿐이다. 네 칸이 이미 다 찼으면 마지막 칸(b2)을 덮어쓴다.
+function fillFirstEmpty4p(name, needsSkins) {
+  const defaults = {
+    a1: needsSkins ? "A1" : "선수1", a2: needsSkins ? "A2" : "선수2",
+    b1: needsSkins ? "B1" : "선수3", b2: needsSkins ? "B2" : "선수4",
+  };
+  for (const key of ["a1", "a2", "b1", "b2"]) {
+    const el = document.getElementById(key);
+    if (!el) continue;
+    if (!el.value.trim() || el.value.trim() === defaults[key]) { el.value = name; return; }
+  }
+  document.getElementById("b2").value = name;
+}
+
+// 등록부(숨긴 선수 제외)에서 탭 한 번으로 이름칸을 채우는 칩 — 텍스트 입력은 그대로 두고 얹기만 한다.
+function registryChips4pHtml() {
+  const names = loadPlayers().filter((p) => !p.archived).map((p) => p.name);
+  if (names.length === 0) return "";
+  return `
+    <div class="chip-row" style="margin-top:8px;">
+      ${names.map((n) => `<button class="name-chip" data-reg-add="${esc(n)}">${esc(n)}</button>`).join("")}
+    </div>
+  `;
+}
+
 function playerSectionHtml() {
-  const players = loadPlayers().filter((p) => !p.archived);
-  if (players.length === 0) return "";
+  const all = loadPlayers();
+  const active = all.filter((p) => !p.archived);
+  const archived = all.filter((p) => p.archived);
+  if (all.length === 0) return "";
   const counts = playerRoundCounts();
 
-  return `
-    <label class="section-gap">선수 관리 (${players.length})</label>
-    <div class="card" style="padding:0;">
-      ${players.map((p) => `
-        <div class="round-item" style="cursor:default;">
-          <div style="min-width:0;">
-            <div class="t">${esc(p.name)}</div>
-            <div class="s">${counts[p.id] || 0}라운드 참여</div>
-          </div>
-          <button class="btn-ghost" data-player-toggle="${p.id}" style="padding:6px 10px; font-size:11.5px; flex-shrink:0;">관리</button>
+  const rows = active.map((p) => `
+    <div class="round-item" style="cursor:default;">
+      <div style="min-width:0;">
+        <div class="t">${esc(p.name)}</div>
+        <div class="s">${counts[p.id] || 0}라운드 참여</div>
+      </div>
+      <button class="btn-ghost" data-player-toggle="${p.id}" style="padding:6px 10px; font-size:11.5px; flex-shrink:0;">관리</button>
+    </div>
+    <div id="player-box-${p.id}" class="hidden" style="padding:12px 14px; border-top:1px solid var(--line);">
+      <label style="margin:0 0 4px;">이름 변경</label>
+      <div class="row2">
+        <input type="text" id="player-name-${p.id}" value="${esc(p.name)}" />
+        <button class="btn-secondary" data-rename-save="${p.id}">저장</button>
+      </div>
+      ${active.length > 1 ? `
+        <label style="margin:14px 0 4px;">다른 선수와 병합</label>
+        <div style="font-size:11.5px; color:var(--creamDim); margin-bottom:6px;">
+          선택한 선수가 사라지고 지난 라운드 기록이 전부 ${esc(p.name)}로 합쳐집니다. 되돌릴 수 없습니다.
         </div>
-        <div id="player-box-${p.id}" class="hidden" style="padding:12px 14px; border-top:1px solid var(--line);">
-          <label style="margin:0 0 4px;">이름 변경</label>
-          <div class="row2">
-            <input type="text" id="player-name-${p.id}" value="${esc(p.name)}" />
-            <button class="btn-secondary" data-rename-save="${p.id}">저장</button>
-          </div>
-          ${players.length > 1 ? `
-            <label style="margin:14px 0 4px;">다른 선수와 병합</label>
-            <div style="font-size:11.5px; color:var(--creamDim); margin-bottom:6px;">
-              선택한 선수가 사라지고 지난 라운드 기록이 전부 ${esc(p.name)}로 합쳐집니다. 되돌릴 수 없습니다.
-            </div>
-            <div class="row2">
-              <select id="player-merge-${p.id}">
-                ${players.filter((o) => o.id !== p.id).map((o) => `<option value="${o.id}">${esc(o.name)}</option>`).join("")}
-              </select>
-              <button class="btn-secondary" data-merge-save="${p.id}">병합</button>
-            </div>
-          ` : ""}
+        <div class="row2">
+          <select id="player-merge-${p.id}">
+            ${active.filter((o) => o.id !== p.id).map((o) => `<option value="${o.id}">${esc(o.name)}</option>`).join("")}
+          </select>
+          <button class="btn-secondary" data-merge-save="${p.id}">병합</button>
+        </div>
+      ` : ""}
+      <button class="btn-ghost" data-archive-save="${p.id}" style="width:100%; margin-top:14px;">숨기기</button>
+    </div>
+  `).join("");
+
+  const archivedSection = archived.length === 0 ? "" : `
+    <button class="btn-ghost" id="showArchivedBtn" style="width:100%; margin-top:8px;">숨긴 선수 보기 (${archived.length})</button>
+    <div id="archivedBox" class="hidden card" style="padding:0; margin-top:8px;">
+      ${archived.map((p) => `
+        <div class="round-item" style="cursor:default;">
+          <div style="min-width:0;"><div class="t">${esc(p.name)}</div></div>
+          <button class="btn-ghost" data-unarchive="${p.id}" style="padding:6px 10px; font-size:11.5px; flex-shrink:0;">다시 보이기</button>
         </div>
       `).join("")}
     </div>
+  `;
+
+  return `
+    <label class="section-gap">선수 관리 (${active.length})</label>
+    ${active.length > 0 ? `<div class="card" style="padding:0;">${rows}</div>` : ""}
+    ${archivedSection}
   `;
 }
 
@@ -1455,6 +1552,22 @@ function bindPlayerSection() {
       mergePlayersAndSave(keepId, mergeId);
       render();
     };
+  });
+  document.querySelectorAll("[data-archive-save]").forEach((el) => {
+    el.onclick = () => {
+      if (!confirm("이 선수를 숨길까요? 목록에서만 빠지고 지난 기록은 그대로 남습니다.")) return;
+      archivePlayerAndSave(el.dataset.archiveSave);
+      render();
+    };
+  });
+  const showArchivedBtn = document.getElementById("showArchivedBtn");
+  if (showArchivedBtn) {
+    showArchivedBtn.onclick = () => {
+      document.getElementById("archivedBox").classList.toggle("hidden");
+    };
+  }
+  document.querySelectorAll("[data-unarchive]").forEach((el) => {
+    el.onclick = () => { unarchivePlayerAndSave(el.dataset.unarchive); render(); };
   });
 }
 
@@ -1786,6 +1899,19 @@ function classicSummaryText(st) {
   return L.join("\n");
 }
 
+// 등록부(숨긴 선수 제외)에서 탭 한 번으로 참가자를 채우는 칩 — [data-add] 핸들러를 그대로 재사용한다
+// (최근 참가자 칩과 채우는 로직이 똑같으므로: 빈 칸 있으면 채우고, 없으면 새 줄을 추가).
+function registryChipsGroupHtml(excludeNames) {
+  const names = loadPlayers().filter((p) => !p.archived).map((p) => p.name).filter((n) => !excludeNames.includes(n));
+  if (names.length === 0) return "";
+  return `
+    <label style="margin-top:14px;">등록부에서 선택</label>
+    <div class="chip-row">
+      ${names.map((n) => `<button class="name-chip" data-add="${esc(n)}">${esc(n)}</button>`).join("")}
+    </div>
+  `;
+}
+
 // ---- 단체전: 설정 ----
 function syncGroupInputs() {
   const titleEl = document.getElementById("gTitle");
@@ -1848,6 +1974,7 @@ function renderGroupSetup() {
         <button class="btn-secondary" id="addPlayer">+ 참가자 추가</button>
         <button class="btn-secondary" id="addCart">+ 조 추가</button>
       </div>
+      <button class="btn-ghost" id="lastLineupBtn" style="width:100%; margin-top:10px;">지난 멤버 그대로</button>
 
       ${suggest.length ? `
         <label>최근 참가자</label>
@@ -1855,6 +1982,7 @@ function renderGroupSetup() {
           ${suggest.map((n) => `<button class="name-chip" data-add="${esc(n)}">${esc(n)}</button>`).join("")}
         </div>
       ` : ""}
+      ${registryChipsGroupHtml(typed)}
 
       <div class="toggle-row" style="margin-top:14px;">
         <div>
@@ -1888,6 +2016,13 @@ function renderGroupSetup() {
   document.getElementById("modeBoth").onclick = () => go("both");
   document.getElementById("modePeoria").onclick = () => go("peoria");
   document.getElementById("modeGroup").onclick = () => go("group");
+
+  document.getElementById("lastLineupBtn").onclick = () => {
+    const lineup = loadLastLineup("group");
+    if (!lineup) { alert("지난 단체전 기록이 없습니다."); return; }
+    setupGroup.players = lineup.players.map((p) => ({ name: p.name, cart: p.cart }));
+    renderGroupSetup();
+  };
 
   document.getElementById("addPlayer").onclick = () => {
     syncGroupInputs();
