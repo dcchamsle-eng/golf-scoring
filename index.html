@@ -786,77 +786,29 @@ function migrateIfNeeded() {
 }
 
 
-// ---- data/scan.js ----
-// 스코어카드 사진 -> golf_scoring_scan_worker 호출. 워커가 Anthropic API 키를 들고 있어서
-// 여기선 사진과 최소 정보(홀 수, 선수 이름 순서)만 보낸다. 실패하면 한국어로 이유를 알 수 있는
-// Error를 던진다 — 호출자가 그대로 toast()에 넘겨도 되게.
-//
-// WORKER_URL/APP_TOKEN은 golf_scoring_scan_worker 배포 후 실제 값으로 바꿔야 한다
-// (golf_scoring_scan_worker/README.md 참고). 둘 다 "비밀"은 아니다 — 클라이언트 JS에 그대로
-// 들어가는 값이고, 실제 방어선은 워커 쪽 Anthropic API 키(서버에만 있음)다.
-const WORKER_URL = "https://REPLACE-ME.workers.dev/scan";
-const APP_TOKEN = "REPLACE-ME";
-
-const MAX_DIMENSION = 1600; // 리사이즈 후 긴 변 기준 px — 업로드 용량/비전 API 토큰 비용 절감용
-
-function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).split(",")[1]); // "data:...;base64," 접두사 제거
-    reader.onerror = () => reject(new Error("파일을 읽지 못했습니다."));
-    reader.readAsDataURL(blob);
-  });
-}
-
-// 폰 카메라 원본(보통 3~8MB)을 그대로 보내면 코스 와이파이에서 느리고 API 비용도 커진다.
-// 캔버스로 리사이즈 + JPEG 재압축해서 보낸다.
-async function prepareImage(file) {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
-  const w = Math.round(bitmap.width * scale);
-  const h = Math.round(bitmap.height * scale);
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  canvas.getContext("2d").drawImage(bitmap, 0, 0, w, h);
-  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
-  if (!blob) throw new Error("사진을 처리하지 못했습니다.");
-  return { base64: await blobToBase64(blob), mimeType: "image/jpeg" };
-}
-
-// totalHoles/players(이름 배열, 스코어카드 열 순서와 같다고 가정)를 받아 워커에 인식을 요청한다.
-// 성공하면 { holes: [{hole,par,scores:{이름:타수|null}}], warnings: string[] }를 돌려준다.
-async function scanScorecard(file, { totalHoles, players }) {
-  let image, mimeType;
-  try {
-    ({ base64: image, mimeType } = await prepareImage(file));
-  } catch {
-    throw new Error("사진을 처리하지 못했습니다. 다른 사진으로 다시 시도해주세요.");
-  }
-
-  let res;
-  try {
-    res = await fetch(WORKER_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-App-Token": APP_TOKEN },
-      body: JSON.stringify({ image, mimeType, totalHoles, players }),
-    });
-  } catch {
-    throw new Error("네트워크 연결을 확인해주세요. 신호가 약하면 그냥 직접 입력해도 됩니다.");
-  }
-
-  if (!res.ok) {
-    let detail = "";
-    try { detail = (await res.json()).error || ""; } catch { /* 응답이 JSON이 아니면 무시 */ }
-    throw new Error(`인식에 실패했습니다${detail ? ": " + detail : ""}. 직접 입력해주세요.`);
-  }
-
-  return res.json();
-}
-
-
 // ---- core/scan.js ----
-// 워커가 돌려준 스캔 결과({holes:[{hole,par,scores:{이름:타수|null}}], warnings})를
+// 클로드(대화 상대)가 스코어카드 사진을 직접 읽고 만들어준 JSON 텍스트를 파싱/검증한다.
+// 원래는 클라우드 비전 API를 호출하는 워커가 이 모양({holes, warnings})을 돌려줬는데,
+// API 비용 부담 때문에 "사용자가 대화창에서 클로드에게 사진을 보여주면 클로드가 이 JSON을 직접
+// 만들어 알려주고, 그걸 여기 붙여넣는" 방식으로 바꿨다 — 서버/네트워크/API키가 전혀 필요 없다.
+// 형식은 워커가 쓰던 것과 동일하게 유지한다(검토 그리드 쪽 코드를 그대로 재사용하려고).
+function parseScanPaste(text, totalHoles) {
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error("JSON 형식이 아닙니다. 클로드가 준 텍스트를 그대로(다른 말 없이) 붙여넣어주세요.");
+  }
+  if (!data || !Array.isArray(data.holes)) {
+    throw new Error("holes 배열이 없습니다. 형식이 맞는지 확인해주세요.");
+  }
+  if (data.holes.length !== totalHoles) {
+    throw new Error(`홀 개수가 ${totalHoles}개가 아닙니다 (받은 건 ${data.holes.length}개).`);
+  }
+  return { holes: data.holes, warnings: Array.isArray(data.warnings) ? data.warnings : [] };
+}
+
+// 스코어카드 사진 인식 결과({holes:[{hole,par,scores:{이름:타수|null}}], warnings})를
 // 앱 내부 키(4인 모드는 a1/a2/b1/b2, 단체전은 player.id)로 바꾼다. 순수 함수 — DOM/localStorage 모름.
 // 모드별 홀 객체 조립(par/a1../bonus vs par/scores/nearest/longest)은 호출자(ui) 몫으로 남긴다 —
 // 이 함수는 "이름 -> 우리 쪽 키" 치환과 값 검증까지만 한다.
@@ -2039,35 +1991,39 @@ function keyedPlayersFor(st) {
     : PLAYER_KEYS.map((k) => ({ key: k, name: st.names[k] }));
 }
 
+// 클라우드 비전 API 대신 대화창에서 클로드에게 스코어카드 사진을 보여주고 받은 JSON을 여기 붙여넣는
+// 방식으로 쓴다(서버·API 키·비용 없음). 형식은 core/scan.js 상단 주석 참고.
 function scanButtonHtml() {
   return `
-    <button class="btn-ghost" id="scanBtn">📷 사진으로 채우기</button>
-    <input type="file" accept="image/*" capture="environment" id="scanFileInput" class="hidden" />
+    <button class="btn-ghost" id="scanBtn">🤖 인식 결과 붙여넣기</button>
+    <div id="scanPasteBox" class="hidden" style="margin-top:8px; text-align:left;">
+      <div style="font-size:11.5px; color:var(--creamDim); margin-bottom:6px; line-height:1.5;">
+        클로드에게 스코어카드 사진을 보여주고 받은 텍스트를 아래에 그대로 붙여넣으세요.
+      </div>
+      <textarea id="scanPasteInput" placeholder="여기에 붙여넣기" style="width:100%; min-height:80px; padding:8px; background:var(--bg); border:1px solid var(--line); border-radius:4px; color:var(--cream); font-family:inherit; font-size:13px;"></textarea>
+      <button class="btn-primary" id="scanPasteApply" style="margin-top:6px; width:100%;">적용</button>
+    </div>
   `;
 }
 
 function bindScanButton() {
   const btn = document.getElementById("scanBtn");
-  const fileInput = document.getElementById("scanFileInput");
-  if (!btn || !fileInput) return;
-  btn.onclick = () => fileInput.click();
-  fileInput.onchange = async () => {
-    const file = fileInput.files[0];
-    fileInput.value = ""; // 같은 파일을 다시 골라도 change가 또 발생하도록
-    if (!file) return;
+  const box = document.getElementById("scanPasteBox");
+  const input = document.getElementById("scanPasteInput");
+  const applyBtn = document.getElementById("scanPasteApply");
+  if (!btn || !box) return;
+  btn.onclick = () => box.classList.toggle("hidden");
+  applyBtn.onclick = () => {
     const keyedPlayers = keyedPlayersFor(state);
-    const originalLabel = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = "인식 중...";
+    let parsed;
     try {
-      const result = await scanScorecard(file, { totalHoles: state.totalHoles, players: keyedPlayers.map((p) => p.name) });
-      scanDraft = { holes: mapScanScores(result, keyedPlayers), warnings: result.warnings || [] };
-      render();
+      parsed = parseScanPaste(input.value, state.totalHoles);
     } catch (e) {
-      toast(e.message || "인식에 실패했습니다. 직접 입력해주세요.");
-      btn.disabled = false;
-      btn.textContent = originalLabel;
+      toast(e.message);
+      return;
     }
+    scanDraft = { holes: mapScanScores(parsed, keyedPlayers), warnings: parsed.warnings };
+    render();
   };
 }
 
